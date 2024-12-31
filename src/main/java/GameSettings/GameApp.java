@@ -14,7 +14,9 @@ public class GameApp extends GameApplication {
     private final int anchoPantalla = 1400;
     private final int altoPantalla = 700;
     private Entity mazo;
+    private Entity mazoRecarga;
     private final int limiteCartas = 7;
+    private final int limiteMazoRecarga = 50;
 
     @Override
     protected void initSettings(GameSettings gameSettings) {
@@ -25,10 +27,10 @@ public class GameApp extends GameApplication {
     @Override
     protected void initGame() {
         FXGL.getGameWorld().addEntityFactory(new GameFactory());
-        mazo = spawn("mazo", 100, 100);
+        mazo = spawn("mazo");
 
         for (int i = 0; i < limiteCartas; i++) {
-            Entity carta = spawn("carta_luz", 100, 100); 
+            Entity carta = spawn("carta_luz"); 
             agregarCartaAlMazo(mazo, carta); 
         }
         mostrarCartas(mazo);
@@ -44,7 +46,7 @@ public class GameApp extends GameApplication {
         List<Entity> cartas = mazoComponent.getCartas();
         double startX = 100;
         double startY = 300;
-        double spacing = 120;
+        double spacing = 90;
 
         for (int i = 0; i < cartas.size(); i++) {
             Entity carta = cartas.get(i);

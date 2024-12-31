@@ -15,7 +15,7 @@ import static com.almasb.fxgl.dsl.FXGL.*;
 public class GameFactory implements EntityFactory {
 
     public enum EntityType {
-        CARTA_LUZ, CARTA_OSCURIDAD, MAZO
+        CARTA_LUZ, CARTA_OSCURIDAD, MAZO, MAZO_RECARGA
     }
 
     private static final Random random = new Random();
@@ -37,7 +37,7 @@ public class GameFactory implements EntityFactory {
         String imagenAleatoria = "luz/" + imagenesCartaLuz.get(random.nextInt(imagenesCartaLuz.size()));
         return entityBuilder(data)
             .type(EntityType.CARTA_LUZ)
-            .viewWithBBox(texture(imagenAleatoria, 100, 150))
+            .viewWithBBox(texture(imagenAleatoria, 80, 130))
             .build();
     }
 
@@ -47,7 +47,15 @@ public class GameFactory implements EntityFactory {
             .type(EntityType.MAZO)
             .with(new MazoComponent())
             .build();
-        
+        return mazo;
+    }
+
+    @Spawns("mazo_recarga")
+    public Entity crearMazoRecarga(SpawnData data) {
+        Entity mazo = entityBuilder(data)
+            .type(EntityType.MAZO_RECARGA)
+            .with(new MazoComponent())
+            .build();
         return mazo;
     }
 }
