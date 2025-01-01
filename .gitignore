@@ -1,5 +1,6 @@
 target/
 !.mvn/wrapper/maven-wrapper.jar
+.mvn/
 !**/src/main/**/target/
 !**/src/test/**/target/
 
@@ -36,3 +37,8 @@ build/
 
 ### Mac OS ###
 .DS_Store
+### ###
+logs
+system
+mvnw
+mvnw.cmd

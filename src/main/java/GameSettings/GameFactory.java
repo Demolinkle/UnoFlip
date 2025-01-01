@@ -4,6 +4,7 @@ import com.almasb.fxgl.entity.EntityFactory;
 import com.almasb.fxgl.entity.Entity;
 import com.almasb.fxgl.entity.SpawnData;
 import com.almasb.fxgl.entity.Spawns;
+import component.MazoComponent;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -22,8 +23,8 @@ public class GameFactory implements EntityFactory {
     private static final List<String> imagenesCartaLuz = new ArrayList<>();
 
     static {
-        File folder = new File("C:\\Users\\Usuario\\OneDrive\\Documentos\\Game\\src\\main\\resources\\assets\\textures\\luz");
-        File[] files = folder.listFiles((dir, name) -> name.endsWith(".png") || name.endsWith(".PNG"));
+        File folderLuz = new File("src/main/resources/assets/textures/luz");
+        File[] files = folderLuz.listFiles((dir, name) -> name.endsWith(".png") || name.endsWith(".PNG"));
 
         if (files != null) {
             for (File file : files) {
@@ -34,28 +35,25 @@ public class GameFactory implements EntityFactory {
 
     @Spawns("carta_luz")
     public Entity nuevaCarta1(SpawnData data) {
-        String imagenAleatoria = "luz/" + imagenesCartaLuz.get(random.nextInt(imagenesCartaLuz.size()));
         return entityBuilder(data)
             .type(EntityType.CARTA_LUZ)
-            .viewWithBBox(texture(imagenAleatoria, 80, 130))
+            //.viewWithBBox(80, 130))
             .build();
     }
 
     @Spawns("mazo")
     public Entity crearMazo(SpawnData data) {
-        Entity mazo = entityBuilder(data)
+        return entityBuilder(data)
             .type(EntityType.MAZO)
             .with(new MazoComponent())
             .build();
-        return mazo;
     }
 
     @Spawns("mazo_recarga")
     public Entity crearMazoRecarga(SpawnData data) {
-        Entity mazo = entityBuilder(data)
+        return entityBuilder(data)
             .type(EntityType.MAZO_RECARGA)
             .with(new MazoComponent())
             .build();
-        return mazo;
     }
 }
