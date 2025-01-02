@@ -9,7 +9,6 @@ import component.MazoComponent;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
 
 import static com.almasb.fxgl.dsl.FXGL.*;
 
@@ -19,7 +18,6 @@ public class GameFactory implements EntityFactory {
         CARTA_LUZ, CARTA_OSCURIDAD, MAZO, MAZO_RECARGA
     }
 
-    private static final Random random = new Random();
     private static final List<String> imagenesCartaLuz = new ArrayList<>();
 
     static {

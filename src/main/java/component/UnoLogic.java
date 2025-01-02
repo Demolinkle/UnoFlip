@@ -6,7 +6,7 @@ import org.apache.logging.log4j.Logger;
 import static com.almasb.fxgl.dsl.FXGL.*;
 
 import java.util.List;
-import component.Carta;
+//import component.Carta;
 import static com.almasb.fxgl.dsl.FXGL.entityBuilder;
 import static com.almasb.fxgl.dsl.FXGL.getGameWorld;
 
@@ -15,7 +15,7 @@ public class UnoLogic extends Component {
     private static final Logger log = LogManager.getLogger(UnoLogic.class);
 
     public static void agregarCartaAlMazo(Entity mazo, Entity carta) {
-        MazoComponent mazoComponent = mazo.getComponent(MazoComponent.class);
+        //MazoComponent mazoComponent = mazo.getComponent(MazoComponent.class);
         //mazoComponent.agregarCarta(carta);
     }
 
