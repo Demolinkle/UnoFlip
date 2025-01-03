@@ -1,4 +1,10 @@
 package Runner;
 
-public class runner {
+import GameSettings.test;
+
+public class runner extends test {
+
+    public static void main(String[] args) {
+        launch(args);
+    }
 }
