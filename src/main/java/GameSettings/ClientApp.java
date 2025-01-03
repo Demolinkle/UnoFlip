@@ -28,6 +28,7 @@ public class ClientApp extends GameApplication {
         gameSettings.setWidth(anchoPantalla);
         gameSettings.setHeight(altoPantalla);
         gameSettings.setTitle("Uno Flip");
+        gameSettings.addEngineService(MultiplayerService.class);
     }
 
     @Override
