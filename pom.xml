@@ -10,7 +10,7 @@
 
     <properties>
         <log4j.version>2.21.0</log4j.version>
-        <fxgl.version>21.1</fxgl.version>
+        <fxgl.version>17.3</fxgl.version>
         <maven.compiler.source>21</maven.compiler.source>
         <maven.compiler.target>21</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>

@@ -6,6 +6,11 @@ import com.almasb.fxgl.core.serialization.Bundle;
 import com.almasb.fxgl.entity.Entity;
 import com.almasb.fxgl.input.Input;
 import com.almasb.fxgl.net.Connection;
+
+import component.UnoLogic;
+
+//import component.UnoLogic;
+
 import com.almasb.fxgl.multiplayer.MultiplayerService;
 import javafx.scene.input.MouseButton;
 import com.almasb.fxgl.dsl.FXGL;
@@ -27,12 +32,14 @@ public class ClientApp extends GameApplication {
     protected void initSettings(GameSettings gameSettings) {
         gameSettings.setWidth(anchoPantalla);
         gameSettings.setHeight(altoPantalla);
-        gameSettings.setTitle("Uno Flip");
+        gameSettings.setTitle("Jugador");
         gameSettings.addEngineService(MultiplayerService.class);
     }
 
     @Override
     protected void initGame() {
+        getGameWorld().addEntityFactory(new GameFactory());
+        
         var client = getNetService().newTCPClient("localhost", 55555);
         client.setOnConnected(conn -> {
             conexion = conn;
@@ -43,9 +50,18 @@ public class ClientApp extends GameApplication {
     }
 
     private void onClient() {
+        
         getService(MultiplayerService.class).addEntityReplicationReceiver(conexion, getGameWorld());
         getService(MultiplayerService.class).addInputReplicationSender(conexion, getInput());
         getService(MultiplayerService.class).addPropertyReplicationReceiver(conexion, getWorldProperties());
+
+        conexion.addMessageHandlerFX((connection, bundle) -> {
+            if (bundle.getName().equals("Recibido")) {
+                UnoLogic.mostrarCartas(mazo);
+            }
+        });
+
+
     }
 
     @Override

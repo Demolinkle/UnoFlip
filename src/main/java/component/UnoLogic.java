@@ -12,8 +12,6 @@ import static com.almasb.fxgl.dsl.FXGL.getGameWorld;
 
 public class UnoLogic extends Component {
 
-    private static final Logger log = LogManager.getLogger(UnoLogic.class);
-
     public static void agregarCartaAlMazo(Entity mazo, Entity carta) {
         MazoComponent mazoComponent = mazo.getComponent(MazoComponent.class);
         //mazoComponent.agregarCarta(carta);

@@ -18,12 +18,6 @@ public class MazoComponent extends Component {
         generarMazo();
     }
 
-    private void template() {
-        //Entity carta = getGameWorld().create("carta","carta_luz");
-        //carta.getViewComponent().addChild(texture("luz/amarillo", 80, 130));
-        //carta.addComponent(new BoundingBoxComponent());
-    }
-
     public List<Carta> getCartas() {
         return cartas;
     }
