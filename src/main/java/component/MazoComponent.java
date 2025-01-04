@@ -7,6 +7,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Collections;
 
+import static com.almasb.fxgl.dsl.FXGL.*;
+import static component.UnoLogic.mostrarCartas;
+
 public class MazoComponent extends Component {
 
     private final String path = "src/main/resources/assets/textures/luz/";
@@ -36,5 +39,28 @@ public class MazoComponent extends Component {
         }
 
         Collections.shuffle(cartas);
+    }
+
+    public void mostrarMazo() {
+        double startX = 50;
+        double startY = 50;
+        double spacing = 70;
+        int i = 0;
+
+        for (Carta carta : cartas) {
+            Entity aux = entityBuilder() //luz/verde/5.png
+                    .viewWithBBox(texture(String.format("luz/%s/%s.png", carta.getColor(), carta.getId()), 60, 100))
+                    .build();
+
+            aux.setPosition((startX + i * spacing), startY);
+            i++;
+
+            if (i % 16 == 0) {
+                startY += 120;
+                i=0;
+            }
+
+            getGameWorld().addEntity(aux);
+        }
     }
 }

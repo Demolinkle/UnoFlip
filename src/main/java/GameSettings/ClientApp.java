@@ -50,18 +50,9 @@ public class ClientApp extends GameApplication {
     }
 
     private void onClient() {
-        
         getService(MultiplayerService.class).addEntityReplicationReceiver(conexion, getGameWorld());
         getService(MultiplayerService.class).addInputReplicationSender(conexion, getInput());
         getService(MultiplayerService.class).addPropertyReplicationReceiver(conexion, getWorldProperties());
-
-        conexion.addMessageHandlerFX((connection, bundle) -> {
-            if (bundle.getName().equals("Recibido")) {
-                UnoLogic.mostrarCartas(mazo);
-            }
-        });
-
-
     }
 
     @Override

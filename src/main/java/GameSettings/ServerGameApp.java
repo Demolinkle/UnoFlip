@@ -53,13 +53,8 @@ public class ServerGameApp extends GameApplication implements Serializable{
     }
 
     private void onServer() {
-
         mazo = spawn("mazo");
-        Entity mazoRecarga = spawn("mazo_recarga");
-        
         getService(MultiplayerService.class).spawn(conexion, mazo, "mazo");
-
-        UnoLogic.mostrarCartas(mazo);
 
         // Manejar mensajes recibidos
         conexion.addMessageHandlerFX((connection, bundle) -> {

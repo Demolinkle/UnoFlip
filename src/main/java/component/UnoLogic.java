@@ -25,8 +25,6 @@ public class UnoLogic extends Component {
         double spacing = 70;
         int i = 0;
 
-        //log.info("cartas: {}", cartas.size());
-
         for (Carta carta : cartas) {
             Entity aux = entityBuilder() //luz/verde/5.png
                     .viewWithBBox(texture(String.format("luz/%s/%s.png", carta.getColor(), carta.getId()), 60, 100))

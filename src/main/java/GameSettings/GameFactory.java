@@ -48,10 +48,14 @@ public class GameFactory implements EntityFactory {
     @Spawns("mazo")
     public Entity crearMazo(SpawnData data) {
         return entityBuilder(data)
-            .type(EntityType.MAZO)
-            .with(new MazoComponent())
-            .with(new NetworkComponent())
-            .build();
+                .type(EntityType.MAZO)
+                .viewWithBBox(texture("carta_portada.png", 100, 100))
+                .with(new MazoComponent())
+                .with(new NetworkComponent())
+                .onClick(e -> {
+                  UnoLogic.mostrarCartas(e);
+                })
+                .build();
     }
 
     @Spawns("mazo_recarga")
