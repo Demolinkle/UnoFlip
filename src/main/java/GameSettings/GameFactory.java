@@ -4,7 +4,10 @@ import com.almasb.fxgl.entity.EntityFactory;
 import com.almasb.fxgl.entity.Entity;
 import com.almasb.fxgl.entity.SpawnData;
 import com.almasb.fxgl.entity.Spawns;
+import com.almasb.fxgl.multiplayer.NetworkComponent;
+
 import component.MazoComponent;
+import component.UnoLogic;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -36,22 +39,31 @@ public class GameFactory implements EntityFactory {
         return entityBuilder(data)
             .type(EntityType.CARTA_LUZ)
             //.viewWithBBox(80, 130))
+            .with(new NetworkComponent())
             .build();
     }
 
     @Spawns("mazo")
     public Entity crearMazo(SpawnData data) {
         return entityBuilder(data)
-            .type(EntityType.MAZO)
-            .with(new MazoComponent())
-            .build();
+                .type(EntityType.MAZO)
+                .viewWithBBox(texture("carta_portada.png", 100, 100))
+                .with(new MazoComponent())
+                .with(new NetworkComponent())
+                .onClick(e -> {
+                  UnoLogic.mostrarCartas(e);
+                })
+                .build();
     }
 
     @Spawns("mazo_recarga")
     public Entity crearMazoRecarga(SpawnData data) {
         return entityBuilder(data)
             .type(EntityType.MAZO_RECARGA)
-            .with(new MazoComponent())
+            .view(texture("luz/amarillo/1.png", 100, 100))
+            .at(300, 300)
+            //.with(new MazoComponent())
+            .with(new NetworkComponent())
             .build();
     }
 }
