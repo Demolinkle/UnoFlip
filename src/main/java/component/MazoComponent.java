@@ -8,11 +8,11 @@ import java.util.List;
 import java.util.Collections;
 
 import static com.almasb.fxgl.dsl.FXGL.*;
-import static component.UnoLogic.mostrarCartas;
+//import static component.UnoLogic.mostrarCartas;
 
 public class MazoComponent extends Component {
 
-    private final String path = "src/main/resources/assets/textures/luz/";
+    //private final String path = "src/main/resources/assets/textures/luz/";
     private List<Carta> cartas;
 
     // Constructor
@@ -63,4 +63,6 @@ public class MazoComponent extends Component {
             getGameWorld().addEntity(aux);
         }
     }
+
+    
 }

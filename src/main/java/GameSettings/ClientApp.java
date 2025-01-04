@@ -3,27 +3,20 @@ package GameSettings;
 import com.almasb.fxgl.app.GameApplication;
 import com.almasb.fxgl.app.GameSettings;
 import com.almasb.fxgl.core.serialization.Bundle;
-import com.almasb.fxgl.entity.Entity;
+//import com.almasb.fxgl.entity.Entity;
 import com.almasb.fxgl.input.Input;
 import com.almasb.fxgl.net.Connection;
-
-import component.UnoLogic;
 
 //import component.UnoLogic;
 
 import com.almasb.fxgl.multiplayer.MultiplayerService;
 import javafx.scene.input.MouseButton;
-import com.almasb.fxgl.dsl.FXGL;
 import static com.almasb.fxgl.dsl.FXGL.*;
 
 public class ClientApp extends GameApplication {
 
     private final int anchoPantalla = 1400;
     private final int altoPantalla = 700;
-    private Entity mazo;
-    private Entity mazoRecarga;
-    private final int limiteCartas = 7;
-    private final int limiteMazoRecarga = 50;
     //multiplayer
     private Connection<Bundle> conexion;
     private Input clientInput;

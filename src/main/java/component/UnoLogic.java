@@ -1,19 +1,15 @@
 package component;
 import com.almasb.fxgl.entity.Entity;
 import com.almasb.fxgl.entity.component.Component;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import static com.almasb.fxgl.dsl.FXGL.*;
-
 import java.util.List;
-import component.Carta;
 import static com.almasb.fxgl.dsl.FXGL.entityBuilder;
 import static com.almasb.fxgl.dsl.FXGL.getGameWorld;
 
 public class UnoLogic extends Component {
 
     public static void agregarCartaAlMazo(Entity mazo, Entity carta) {
-        MazoComponent mazoComponent = mazo.getComponent(MazoComponent.class);
+        //MazoComponent mazoComponent = mazo.getComponent(MazoComponent.class);
         //mazoComponent.agregarCarta(carta);
     }
 
