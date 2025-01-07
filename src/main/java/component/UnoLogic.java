@@ -1,5 +1,6 @@
 package component;
 
+import GameSettings.GameFactory;
 import com.almasb.fxgl.entity.Entity;
 import com.almasb.fxgl.entity.component.Component;
 import static com.almasb.fxgl.dsl.FXGL.*;
@@ -42,7 +43,41 @@ public class UnoLogic extends Component {
         }
     }
 
-    //public List<Carta> repartirManoInicial() {
-        
-    //}
+    public static void mostrarMano(List<Carta> cartas) {
+        double startX = 50;
+        double startY = 300;
+        int i = 0;
+        for (Carta carta : cartas) {
+            Entity aux = entityBuilder() // luz/verde/5.png
+                    .viewWithBBox(texture(String.format("luz/%s/%s.png", carta.getColor(), carta.getId()), 60, 100))
+                    .build();
+
+            // Coloca la carta en la nueva posición
+            aux.setPosition(startX + (i % MAX_CARTAS_POR_FILA) * ESPACIADO_HORIZONTAL, startY + (i / MAX_CARTAS_POR_FILA) * ESPACIADO_VERTICAL);
+            i++;
+
+            getGameWorld().addEntity(aux);
+        }
+    }
+
+    public static void mostrarMazo(Entity mazo) {
+        MazoComponent mazoComponent = mazo.getComponent(MazoComponent.class);
+        List<Carta> cartas = mazoComponent.getCartas();
+
+        double startX = 50;
+        double startY = 300;
+        int i = 0;
+        for (Carta carta : cartas) {
+            Entity aux = entityBuilder()
+                    .type(GameFactory.EntityType.CARTA_MAZO)// luz/verde/5.png
+                    .viewWithBBox(texture(String.format("luz/%s/%s.png", carta.getColor(), carta.getId()), 60, 100))
+                    .build();
+
+            // Coloca la carta en la nueva posición
+            aux.setPosition(startX + (i % MAX_CARTAS_POR_FILA) * ESPACIADO_HORIZONTAL, startY + (i / MAX_CARTAS_POR_FILA) * ESPACIADO_VERTICAL);
+            i++;
+
+            getGameWorld().addEntity(aux);
+        }
+    }
 }

@@ -43,7 +43,8 @@ public class MazoComponent extends Component implements Serializable{
         List<Carta> aux = new ArrayList<>();
         for (int i = 0; i < 7; i++) {
             if (!this.cartas.isEmpty()) {
-                aux.add(this.cartas.remove(0)); 
+                aux.add(this.cartas.get(0));
+                this.cartas.remove(0);
             }
         }
         this.cartasRepartidas += 7;

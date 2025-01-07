@@ -3,6 +3,7 @@ package GameSettings;
 import static com.almasb.fxgl.dsl.FXGL.*;
 
 import java.io.Serializable;
+import java.util.List;
 
 import com.almasb.fxgl.core.serialization.Bundle;
 import com.almasb.fxgl.app.GameApplication;
@@ -10,6 +11,8 @@ import com.almasb.fxgl.app.GameSettings;
 import com.almasb.fxgl.entity.Entity;
 
 import com.almasb.fxgl.entity.SpawnData;
+import component.Carta;
+import component.UnoLogic;
 import javafx.scene.input.MouseButton;
 //import com.almasb.fxgl.entity.SpawnData;
 import com.almasb.fxgl.multiplayer.MultiplayerService;
@@ -52,25 +55,19 @@ public class ServerGameApp extends GameApplication implements Serializable{
         //data.put("conexion", conexion.getConnectionNum());
 
         mazo = spawn("mazo");
-        getService(MultiplayerService.class).spawn(conexion, mazo, "mazo");
+        UnoLogic.mostrarMazo(mazo);
+        //getService(MultiplayerService.class).spawn(conexion, mazo, "mazo");
 
         // Manejar mensajes recibidos
         conexion.addMessageHandlerFX((connection, bundle) -> {
-            if (bundle.getName().equals("MouseClick")) {
-                System.out.println("Click izquiedo recibido");
-                //
-                Bundle respuesta = new Bundle("Recibido");
-                conexion.send(respuesta);
-            }
-
-            else if (bundle.getName().equals("Repartir")) {
-                System.out.println("Repartir recibido");
-                //UnoLogic.mostrarCartas(mazo);
-                Bundle respuesta = new Bundle("Enviar mano inicial");
-                // llamar un metodos que nos retorne la  lista de cartas
-                Serializable mano = (Serializable) mazo.getComponent(MazoComponent.class).repartirCartas();
-                respuesta.put("cartas", mano);
-                conexion.send(respuesta);
+            if (bundle.getName().equals("Repartir")) {
+                System.out.println("Ejecutando repartir cartas");
+                List<Carta> temp = mazo.getComponent(MazoComponent.class).repartirCartas();
+                Bundle respuesta = new Bundle("Mano inicial");
+                respuesta.put("cartas", (Serializable) temp);
+                connection.send(respuesta);
+                getGameWorld().getEntitiesByType(GameFactory.EntityType.CARTA_MAZO).forEach(Entity::removeFromWorld);
+                UnoLogic.mostrarMazo(mazo);
             }
         });
     }

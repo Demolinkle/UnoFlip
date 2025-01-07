@@ -30,7 +30,7 @@ public class GameFactory implements EntityFactory {
     //}
 
     public enum EntityType {
-        CARTA_LUZ, CARTA_OSCURIDAD, MAZO, MAZO_JUGADOR
+        CARTA_LUZ, CARTA_OSCURIDAD, MAZO, MAZO_JUGADOR, CARTA_MAZO
     }
 
     private static final List<String> imagenesCartaLuz = new ArrayList<>();
@@ -72,9 +72,7 @@ public class GameFactory implements EntityFactory {
                 .with(new MazoComponent())
                 .with(new NetworkComponent())
                 .onClick(e -> {
-                  //UnoLogic.mostrarCartas(e);
-                  Bundle bundle = new Bundle("Repartir");
-                  conexion.send(bundle);
+                  //UnoLogic.mostrarMazo(e);
                 })
                 .build();
     }

@@ -15,6 +15,7 @@ import com.almasb.fxgl.entity.SpawnData;
 //import component.UnoLogic;
 
 import com.almasb.fxgl.multiplayer.MultiplayerService;
+import component.UnoLogic;
 import javafx.scene.input.MouseButton;
 import static com.almasb.fxgl.dsl.FXGL.*;
 
@@ -51,6 +52,7 @@ public class ClientApp extends GameApplication {
         var client = getNetService().newTCPClient("localhost", 55555);
         client.setOnConnected(conn -> {
             conexion = conn;
+            System.out.println(conexion);
             getExecutor().startAsyncFX(() -> onClient());
         });
         System.out.println("Cliente conectado");
@@ -64,19 +66,10 @@ public class ClientApp extends GameApplication {
 
         // Manejar mensajes recibidos
         conexion.addMessageHandlerFX((conexion, bundle) -> {
-            if (bundle.getName().equals("Enviar mano inicial")) {
+            if (bundle.getName().equals("Mano inicial")) {
                 @SuppressWarnings("unchecked")
                 List<Carta> manoInicial = (List<Carta>) bundle.get("cartas");
-                int i = 0;
-                for (Carta carta : manoInicial) {
-                    Entity aux = entityBuilder() // luz/verde/5.png
-                    .viewWithBBox(texture(String.format("luz/%s/%s.png", carta.getColor(), carta.getId()), 60, 100))
-                    .build();
-                    // Coloca la carta en la nueva posición
-                    aux.setPosition(startX + (i % MAX_CARTAS_POR_FILA) * ESPACIADO_HORIZONTAL, startY + (i / MAX_CARTAS_POR_FILA) * ESPACIADO_VERTICAL);
-                    getGameWorld().addEntity(aux);
-                    i++; 
-                }
+                UnoLogic.mostrarMano(manoInicial);
             }
         });
     }
@@ -87,7 +80,7 @@ public class ClientApp extends GameApplication {
 
         onBtnDown(MouseButton.PRIMARY, () -> {
             System.out.println("Boton");
-            Bundle bundle = new Bundle("MouseClick");
+            Bundle bundle = new Bundle("Repartir");
             conexion.send(bundle);
         });
     }
