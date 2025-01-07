@@ -1,12 +1,8 @@
 package component;
 
+import GameSettings.GameFactory;
 import com.almasb.fxgl.entity.Entity;
 import com.almasb.fxgl.entity.component.Component;
-import com.almasb.fxgl.input.Input;
-
-import javafx.scene.input.KeyCode;
-import javafx.scene.input.MouseButton;
-
 import static com.almasb.fxgl.dsl.FXGL.*;
 import java.util.List;
 
@@ -17,14 +13,7 @@ public class UnoLogic extends Component {
     private static final double ESPACIADO_HORIZONTAL = 55;
     private static final double ESPACIADO_VERTICAL = 30;
 
-    private Entity cartaInicial; // Entidad para la carta inicial
-
-    // Constructor donde pasas la carta inicial
-    public UnoLogic(Entity cartaInicial) {
-        this.cartaInicial = cartaInicial;
-    }
-
-    public static void mostrarCartas(Entity mazo, Entity cartaInicial) {
+    public static void mostrarCartas(Entity mazo) {
         MazoComponent mazoComponent = mazo.getComponent(MazoComponent.class);
         int cartasRepartidas = mazoComponent.getCartasRepartidas();
 
@@ -32,14 +21,14 @@ public class UnoLogic extends Component {
 
         // Si es la primera vez que se hace clic, repartir 7 cartas
         if (cartasRepartidas == 0) {
-            cartasARepartir = mazoComponent.repartirCartas(7);
+            cartasARepartir = mazoComponent.repartirCartas();
         } else {
             // En los clics posteriores, repartir una sola carta
-            cartasARepartir = mazoComponent.repartirCartas(1);
+            cartasARepartir = mazoComponent.repartirCartas();
         }
 
         double startX = 50 + (cartasRepartidas % MAX_CARTAS_POR_FILA); 
-        double startY = 400 + (cartasRepartidas / MAX_CARTAS_POR_FILA) * ESPACIADO_VERTICAL;
+        double startY = 300 + (cartasRepartidas / MAX_CARTAS_POR_FILA) * ESPACIADO_VERTICAL;
         int i = cartasRepartidas; 
         for (Carta carta : cartasARepartir) {
             Entity aux = entityBuilder() // luz/verde/5.png
@@ -50,15 +39,45 @@ public class UnoLogic extends Component {
             aux.setPosition(startX + (i % MAX_CARTAS_POR_FILA) * ESPACIADO_HORIZONTAL, startY + (i / MAX_CARTAS_POR_FILA) * ESPACIADO_VERTICAL);
             i++;
 
-           onBtnDown(MouseButton.PRIMARY, () -> {
-                apilarCartas(aux);
-            });
             getGameWorld().addEntity(aux);
         }
     }
 
-    public void apilarCartas(Entity carta) {
-    
-        carta.setPosition(cartaInicial.getPosition());
+    public static void mostrarMano(List<Carta> cartas) {
+        double startX = 50;
+        double startY = 300;
+        int i = 0;
+        for (Carta carta : cartas) {
+            Entity aux = entityBuilder() // luz/verde/5.png
+                    .viewWithBBox(texture(String.format("luz/%s/%s.png", carta.getColor(), carta.getId()), 60, 100))
+                    .build();
+
+            // Coloca la carta en la nueva posición
+            aux.setPosition(startX + (i % MAX_CARTAS_POR_FILA) * ESPACIADO_HORIZONTAL, startY + (i / MAX_CARTAS_POR_FILA) * ESPACIADO_VERTICAL);
+            i++;
+
+            getGameWorld().addEntity(aux);
+        }
+    }
+
+    public static void mostrarMazo(Entity mazo) {
+        MazoComponent mazoComponent = mazo.getComponent(MazoComponent.class);
+        List<Carta> cartas = mazoComponent.getCartas();
+
+        double startX = 50;
+        double startY = 300;
+        int i = 0;
+        for (Carta carta : cartas) {
+            Entity aux = entityBuilder()
+                    .type(GameFactory.EntityType.CARTA_MAZO)// luz/verde/5.png
+                    .viewWithBBox(texture(String.format("luz/%s/%s.png", carta.getColor(), carta.getId()), 60, 100))
+                    .build();
+
+            // Coloca la carta en la nueva posición
+            aux.setPosition(startX + (i % MAX_CARTAS_POR_FILA) * ESPACIADO_HORIZONTAL, startY + (i / MAX_CARTAS_POR_FILA) * ESPACIADO_VERTICAL);
+            i++;
+
+            getGameWorld().addEntity(aux);
+        }
     }
 }
