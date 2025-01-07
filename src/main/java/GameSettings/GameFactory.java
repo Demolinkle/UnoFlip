@@ -18,7 +18,7 @@ import static com.almasb.fxgl.dsl.FXGL.*;
 public class GameFactory implements EntityFactory {
 
     public enum EntityType {
-        CARTA_LUZ, CARTA_OSCURIDAD, MAZO, MAZO_JUGADOR
+        CARTA_LUZ, CARTA_OSCURIDAD, MAZO, CARTA_INICIAL
     }
 
     private static final List<String> imagenesCartaLuz = new ArrayList<>();
@@ -51,16 +51,18 @@ public class GameFactory implements EntityFactory {
                 .with(new MazoComponent())
                 .with(new NetworkComponent())
                 .onClick(e -> {
-                  UnoLogic.mostrarCartas(e);
+                    Entity cartaInicial = getGameWorld().getEntitiesByType(EntityType.CARTA_INICIAL).get(0);
+                    UnoLogic.mostrarCartas(e, cartaInicial);
                 })
                 .build();
     }
 
-    @Spawns("mazo_jugador")
+    @Spawns("carta_inicial")
     public Entity crearMazoJugador(SpawnData data) {
         return entityBuilder(data)
-            .type(EntityType.MAZO_JUGADOR) 
-            .with(new MazoComponent())
+            .type(EntityType.CARTA_INICIAL) 
+            .viewWithBBox(texture("1.png", 60, 100))
+            .at(700,300)
             .with(new NetworkComponent())
             .build();
     }

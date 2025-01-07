@@ -46,6 +46,8 @@ public class ServerGameApp extends GameApplication implements Serializable{
     private void onServer() {
         mazo = spawn("mazo");
         getService(MultiplayerService.class).spawn(conexion, mazo, "mazo");
+        Entity carta_inicial = spawn("carta_inicial");
+        getService(MultiplayerService.class).spawn(conexion, carta_inicial, "carta_inicial");
 
         // Manejar mensajes recibidos
         conexion.addMessageHandlerFX((connection, bundle) -> {
@@ -64,6 +66,7 @@ public class ServerGameApp extends GameApplication implements Serializable{
         onBtnDown(MouseButton.PRIMARY, () -> {
             System.out.println("Boton");
         });
+        
 
     }
     
