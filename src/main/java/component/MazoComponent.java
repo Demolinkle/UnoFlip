@@ -1,13 +1,11 @@
 package component;
 
 import com.almasb.fxgl.entity.component.Component;
-
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Collections;
 
-public class MazoComponent extends Component implements Serializable{
+public class MazoComponent extends Component {
 
     private List<Carta> cartas;
     private int cartasRepartidas;
@@ -15,8 +13,8 @@ public class MazoComponent extends Component implements Serializable{
     // Constructor
     public MazoComponent() {
         this.cartas = new ArrayList<>();
-        generarMazo();
         this.cartasRepartidas = 0;
+        generarMazo();
     }
 
     public List<Carta> getCartas() {
@@ -39,32 +37,18 @@ public class MazoComponent extends Component implements Serializable{
         Collections.shuffle(cartas);
     }
 
-    public List<Carta> repartirCartas() {
-        List<Carta> aux = new ArrayList<>();
-        for (int i = 0; i < 7; i++) {
-            if (!this.cartas.isEmpty()) {
-                aux.add(this.cartas.get(0));
-                this.cartas.remove(0);
+    public List<Carta> repartirCartas(int cantidad) {
+        List<Carta> cartasRepartidas = new ArrayList<>();
+        for (int i = 0; i < cantidad; i++) {
+            if (this.cartas.size() > 0) {
+                cartasRepartidas.add(this.cartas.remove(0)); 
             }
         }
-        this.cartasRepartidas += 7;
-        return aux;
-    }
-
-    public List<Carta> getSerializableCartas() {
-        return new ArrayList<>(cartas);
-    }
-
-    public Carta robarCarta() {
-        if (!this.cartas.isEmpty()) {
-            this.cartasRepartidas++;
-            return this.cartas.remove(0);
-        }
-        return null;
+        this.cartasRepartidas += cantidad;
+        return cartasRepartidas;
     }
 
     public int getCartasRepartidas() {
         return cartasRepartidas;
     }
-
 }

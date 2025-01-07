@@ -1,13 +1,11 @@
 package GameSettings;
 
-import com.almasb.fxgl.core.serialization.Bundle;
 import com.almasb.fxgl.entity.EntityFactory;
 import com.almasb.fxgl.entity.Entity;
 import com.almasb.fxgl.entity.SpawnData;
 import com.almasb.fxgl.entity.Spawns;
 import com.almasb.fxgl.multiplayer.NetworkComponent;
 
-import com.almasb.fxgl.net.Connection;
 import component.MazoComponent;
 import component.UnoLogic;
 
@@ -19,18 +17,8 @@ import static com.almasb.fxgl.dsl.FXGL.*;
 
 public class GameFactory implements EntityFactory {
 
-    private Connection<Bundle> conexion;
-
-    public GameFactory(Connection<Bundle> conexion) {
-        this.conexion = conexion;
-    }
-    
-    //public GameFactory(){
-        //super();
-    //}
-
     public enum EntityType {
-        CARTA_LUZ, CARTA_OSCURIDAD, MAZO, MAZO_JUGADOR, CARTA_MAZO
+        CARTA_LUZ, CARTA_OSCURIDAD, MAZO, CARTA_INICIAL
     }
 
     private static final List<String> imagenesCartaLuz = new ArrayList<>();
@@ -55,15 +43,6 @@ public class GameFactory implements EntityFactory {
             .build();
     }
 
-    @Spawns("carta_vacia")
-    public Entity cartita(SpawnData data) {
-        return entityBuilder(data)
-            .type(EntityType.CARTA_LUZ)
-
-            .with(new NetworkComponent())
-            .build();
-    }
-
     @Spawns("mazo")
     public Entity crearMazo(SpawnData data) {
         return entityBuilder(data)
@@ -72,16 +51,18 @@ public class GameFactory implements EntityFactory {
                 .with(new MazoComponent())
                 .with(new NetworkComponent())
                 .onClick(e -> {
-                  //UnoLogic.mostrarMazo(e);
+                    //Entity cartaInicial = getGameWorld().getEntitiesByType(EntityType.CARTA_INICIAL).get(0);
+                    UnoLogic.mostrarCartas(e);
                 })
                 .build();
     }
 
-    @Spawns("mazo_jugador")
+    @Spawns("carta_inicial")
     public Entity crearMazoJugador(SpawnData data) {
         return entityBuilder(data)
-            .type(EntityType.MAZO_JUGADOR) 
-            .with(new MazoComponent())
+            .type(EntityType.CARTA_INICIAL) 
+            .viewWithBBox(texture("1.png", 60, 100))
+            .at(700,300)
             .with(new NetworkComponent())
             .build();
     }
