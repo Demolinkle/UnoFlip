@@ -15,6 +15,7 @@ public class MazoComponent extends Component {
         this.cartas = new ArrayList<>();
         this.cartasRepartidas = 0;
         generarMazo();
+        
     }
 
     public List<Carta> getCartas() {
