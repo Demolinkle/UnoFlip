@@ -9,15 +9,19 @@ import com.almasb.fxgl.app.GameApplication;
 import com.almasb.fxgl.app.GameSettings;
 import com.almasb.fxgl.entity.Entity;
 
+import com.almasb.fxgl.entity.SpawnData;
 import javafx.scene.input.MouseButton;
 //import com.almasb.fxgl.entity.SpawnData;
 import com.almasb.fxgl.multiplayer.MultiplayerService;
 import com.almasb.fxgl.net.Connection;
 
+import component.MazoComponent;
+
 public class ServerGameApp extends GameApplication implements Serializable{
     private final int anchoPantalla = 1400;
     private final int altoPantalla = 700;
     private Entity mazo;
+    private SpawnData data;
     //multiplayer
     private Connection<Bundle> conexion;
 
@@ -31,7 +35,7 @@ public class ServerGameApp extends GameApplication implements Serializable{
 
     @Override
     protected void initGame() {
-        getGameWorld().addEntityFactory(new GameFactory());
+        getGameWorld().addEntityFactory(new GameFactory(conexion));
 
         var server = getNetService().newTCPServer(55555);
         server.setOnConnected(conn -> {
@@ -44,6 +48,9 @@ public class ServerGameApp extends GameApplication implements Serializable{
     }
 
     private void onServer() {
+        //data = new SpawnData();
+        //data.put("conexion", conexion.getConnectionNum());
+
         mazo = spawn("mazo");
         getService(MultiplayerService.class).spawn(conexion, mazo, "mazo");
 
@@ -53,6 +60,16 @@ public class ServerGameApp extends GameApplication implements Serializable{
                 System.out.println("Click izquiedo recibido");
                 //
                 Bundle respuesta = new Bundle("Recibido");
+                conexion.send(respuesta);
+            }
+
+            else if (bundle.getName().equals("Repartir")) {
+                System.out.println("Repartir recibido");
+                //UnoLogic.mostrarCartas(mazo);
+                Bundle respuesta = new Bundle("Enviar mano inicial");
+                // llamar un metodos que nos retorne la  lista de cartas
+                Serializable mano = (Serializable) mazo.getComponent(MazoComponent.class).repartirCartas();
+                respuesta.put("cartas", mano);
                 conexion.send(respuesta);
             }
         });

@@ -20,10 +20,10 @@ public class UnoLogic extends Component {
 
         // Si es la primera vez que se hace clic, repartir 7 cartas
         if (cartasRepartidas == 0) {
-            cartasARepartir = mazoComponent.repartirCartas(7);
+            cartasARepartir = mazoComponent.repartirCartas();
         } else {
             // En los clics posteriores, repartir una sola carta
-            cartasARepartir = mazoComponent.repartirCartas(1);
+            cartasARepartir = mazoComponent.repartirCartas();
         }
 
         double startX = 50 + (cartasRepartidas % MAX_CARTAS_POR_FILA); 
@@ -41,4 +41,8 @@ public class UnoLogic extends Component {
             getGameWorld().addEntity(aux);
         }
     }
+
+    //public List<Carta> repartirManoInicial() {
+        
+    //}
 }

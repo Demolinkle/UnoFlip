@@ -1,11 +1,13 @@
 package GameSettings;
 
+import com.almasb.fxgl.core.serialization.Bundle;
 import com.almasb.fxgl.entity.EntityFactory;
 import com.almasb.fxgl.entity.Entity;
 import com.almasb.fxgl.entity.SpawnData;
 import com.almasb.fxgl.entity.Spawns;
 import com.almasb.fxgl.multiplayer.NetworkComponent;
 
+import com.almasb.fxgl.net.Connection;
 import component.MazoComponent;
 import component.UnoLogic;
 
@@ -16,6 +18,16 @@ import java.util.List;
 import static com.almasb.fxgl.dsl.FXGL.*;
 
 public class GameFactory implements EntityFactory {
+
+    private Connection<Bundle> conexion;
+
+    public GameFactory(Connection<Bundle> conexion) {
+        this.conexion = conexion;
+    }
+    
+    //public GameFactory(){
+        //super();
+    //}
 
     public enum EntityType {
         CARTA_LUZ, CARTA_OSCURIDAD, MAZO, MAZO_JUGADOR
@@ -43,6 +55,15 @@ public class GameFactory implements EntityFactory {
             .build();
     }
 
+    @Spawns("carta_vacia")
+    public Entity cartita(SpawnData data) {
+        return entityBuilder(data)
+            .type(EntityType.CARTA_LUZ)
+
+            .with(new NetworkComponent())
+            .build();
+    }
+
     @Spawns("mazo")
     public Entity crearMazo(SpawnData data) {
         return entityBuilder(data)
@@ -51,7 +72,9 @@ public class GameFactory implements EntityFactory {
                 .with(new MazoComponent())
                 .with(new NetworkComponent())
                 .onClick(e -> {
-                  UnoLogic.mostrarCartas(e);
+                  //UnoLogic.mostrarCartas(e);
+                  Bundle bundle = new Bundle("Repartir");
+                  conexion.send(bundle);
                 })
                 .build();
     }
