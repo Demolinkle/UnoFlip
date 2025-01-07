@@ -1,6 +1,12 @@
 package component;
 
+import com.almasb.fxgl.entity.Entity;
 import com.almasb.fxgl.entity.component.Component;
+
+import GameSettings.GameFactory.EntityType;
+
+import static com.almasb.fxgl.dsl.FXGL.*;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Collections;
@@ -51,4 +57,6 @@ public class MazoComponent extends Component {
     public int getCartasRepartidas() {
         return cartasRepartidas;
     }
+
+
 }

@@ -39,29 +39,38 @@ public class GameFactory implements EntityFactory {
         return entityBuilder(data)
             .type(EntityType.CARTA_LUZ)
             //.viewWithBBox(80, 130))
+            .with(new MazoComponent())
             .with(new NetworkComponent())
             .build();
     }
 
     @Spawns("mazo")
     public Entity crearMazo(SpawnData data) {
-        return entityBuilder(data)
+        Entity mazoEntity = entityBuilder(data)
                 .type(EntityType.MAZO)
                 .viewWithBBox(texture("carta_portada.png", 100, 100))
                 .with(new MazoComponent())
                 .with(new NetworkComponent())
                 .onClick(e -> {
-                    //Entity cartaInicial = getGameWorld().getEntitiesByType(EntityType.CARTA_INICIAL).get(0);
-                    UnoLogic.mostrarCartas(e);
+                    // Aquí debes crear una instancia de UnoLogic
+                    Entity cartaInicial = getGameWorld().getEntitiesByType(EntityType.CARTA_INICIAL).get(0); // Obtener la carta inicial
+                    UnoLogic unoLogic = new UnoLogic(cartaInicial); // Crear la instancia de UnoLogic
+
+                    // Llamar a mostrarCartas pasándole ambos parámetros
+                    UnoLogic.mostrarCartas(e, unoLogic); 
                 })
                 .build();
+        
+        return mazoEntity;
     }
+
 
     @Spawns("carta_inicial")
     public Entity crearMazoJugador(SpawnData data) {
         return entityBuilder(data)
             .type(EntityType.CARTA_INICIAL) 
             .viewWithBBox(texture("1.png", 60, 100))
+            .with(new MazoComponent())
             .at(700,300)
             .with(new NetworkComponent())
             .build();
