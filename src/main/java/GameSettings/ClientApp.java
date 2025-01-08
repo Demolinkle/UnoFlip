@@ -4,7 +4,7 @@ import com.almasb.fxgl.app.GameApplication;
 import com.almasb.fxgl.app.GameSettings;
 import com.almasb.fxgl.core.serialization.Bundle;
 import com.almasb.fxgl.entity.Entity;
-//import com.almasb.fxgl.input.Input;
+import com.almasb.fxgl.input.Input;
 import com.almasb.fxgl.net.Connection;
 import java.util.List;
 import component.Carta;
@@ -14,6 +14,7 @@ import component.UnoLogic;
 import com.almasb.fxgl.multiplayer.MultiplayerService;
 import static com.almasb.fxgl.dsl.FXGL.*;
 
+
 import javafx.scene.input.MouseButton;
 
 public class ClientApp extends GameApplication {
@@ -21,6 +22,7 @@ public class ClientApp extends GameApplication {
     private final int anchoPantalla = 1400;
     private final int altoPantalla = 700;
     //multiplayer
+    private Input clientInput;
     private Connection<Bundle> conexion;
     private List<Carta> manoJugador = new ArrayList<>();
     //private List<Carta> manoJugador = new List<>();
@@ -57,16 +59,15 @@ public class ClientApp extends GameApplication {
 
             switch (bundle.getName()) {
                 case "Mano inicial":
-                    //@SuppressWarnings("unchecked")
                     manoJugador = bundle.get("cartas");
-                    UnoLogic.mostrarMano(manoJugador);
+                    UnoLogic.mostrarMano(manoJugador, conexion);
                     break;
             
                 case "Carta robada":
                     Carta cartaRobada = (Carta) bundle.get("carta");
                     getGameWorld().getEntitiesByType(GameFactory.EntityType.CARTA_MAZO).forEach(Entity::removeFromWorld);
                     manoJugador.add(cartaRobada);
-                    UnoLogic.mostrarMano(manoJugador);
+                    UnoLogic.mostrarMano(manoJugador, conexion);
                     break;
             }
         });
@@ -74,10 +75,15 @@ public class ClientApp extends GameApplication {
 
     @Override
     protected void initInput() {
+
+        clientInput = new Input();
+
         onBtnDown(MouseButton.SECONDARY, () -> {
             System.out.println("Click derecho");
             Bundle bundle = new Bundle("Repartir");
             conexion.send(bundle);
         });
+
+        //onEvent(clientInput.mockButtonPress(MouseButton.PRIMARY));
     }
 }

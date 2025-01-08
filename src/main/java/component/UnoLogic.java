@@ -1,13 +1,19 @@
 package component;
 
+import com.almasb.fxgl.core.serialization.Bundle;
 import com.almasb.fxgl.entity.Entity;
 import com.almasb.fxgl.entity.component.Component;
+import com.almasb.fxgl.net.Connection;
+import com.almasb.fxgl.multiplayer.NetworkComponent;
 import static com.almasb.fxgl.dsl.FXGL.*;
 import GameSettings.GameFactory;
+import GameSettings.GameFactory.EntityType;
 import javafx.scene.input.MouseButton;
 import component.MazoComponent;
+import java.io.Serializable;
 import java.util.List;
 import java.util.ArrayList;
+
 
 public class UnoLogic extends Component {
 
@@ -17,11 +23,12 @@ public class UnoLogic extends Component {
     private Entity cartaInicial;
     private List<Entity> cartasMovidas; 
 
+
     public UnoLogic(Entity cartaInicial) {
         this.cartaInicial = cartaInicial;
         this.cartasMovidas = new ArrayList<>(); 
     }
-
+/*
     public static void mostrarCartas(Entity mazo, UnoLogic unoLogic) {
         MazoComponent mazoComponent = mazo.getComponent(MazoComponent.class);
         int cartasRepartidas = mazoComponent.getCartasRepartidas();
@@ -56,7 +63,8 @@ public class UnoLogic extends Component {
             getGameWorld().addEntity(cartaEntity);
         }
     }
-    
+    */
+
     private void moverCarta(Entity carta) {
         carta.setPosition(cartaInicial.getPosition());
         cartasMovidas.add(carta);
@@ -71,13 +79,19 @@ public class UnoLogic extends Component {
         }
     }
 
-    public static void mostrarMano(List<Carta> cartas) {
+    public static void mostrarMano(List<Carta> cartas, Connection<Bundle> conexion) {
         double startX = 50;
         double startY = 300;
         int i = 0;
         for (Carta carta : cartas) {
             Entity aux = entityBuilder() // luz/verde/5.png
+                    .type(GameFactory.EntityType.CARTA)
                     .viewWithBBox(texture(String.format("luz/%s/%s.png", carta.getColor(), carta.getId()), 60, 100))
+                    .onClick(e -> {
+                        Bundle mensaje = new Bundle("Carta a jugar");
+                        mensaje.put("carta", (Serializable) carta);
+                        conexion.send(mensaje);      
+                    })
                     .build();
 
             // Coloca la carta en la nueva posición
@@ -86,6 +100,18 @@ public class UnoLogic extends Component {
 
             getGameWorld().addEntity(aux);
         }
+    }
+
+    public static Entity iniciarJuego(Entity mazo) {
+        MazoComponent mazoComponent = mazo.getComponent(MazoComponent.class);
+        Carta primeraCarta = mazoComponent.getCartas().get(0);
+        Entity cartaInicial = entityBuilder()
+            .type(GameFactory.EntityType.CARTA_INICIAL)// luz/verde/5.png
+            .with(new NetworkComponent())
+            .view(texture(String.format("luz/%s/%s.png", primeraCarta.getColor(), primeraCarta.getId()), 60, 100))
+            .at(700,300)
+            .build();    
+        return cartaInicial;  
     }
 
     public static void mostrarMazo(Entity mazo) {
@@ -107,5 +133,15 @@ public class UnoLogic extends Component {
 
             getGameWorld().addEntity(aux);
         }
+    }
+
+    public static Entity jugarCarta(Carta carta) {
+        Entity cartaJugada = entityBuilder()
+            .type(GameFactory.EntityType.CARTA_INICIAL)// luz/verde/5.png
+            .view(texture(String.format("luz/%s/%s.png", carta.getColor(), carta.getId()), 60, 100))
+            .at(700,300)
+            .build();
+
+        return cartaJugada;
     }
 }

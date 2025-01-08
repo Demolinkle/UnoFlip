@@ -50,14 +50,14 @@ public class ServerGameApp extends GameApplication implements Serializable{
 
     private void onServer() {
         mazo = spawn("mazo");
+        Entity auxiliar = spawn("carta_inicial"); 
+        // carta_inicial = spawn(cartainicial)
+        getService(MultiplayerService.class).spawn(conexion, mazo, "mazo"); //TODO: se puede modificar para que unicamente sea una carta volteada
+        getService(MultiplayerService.class).spawn(conexion, UnoLogic.iniciarJuego(mazo), "mazo");
         UnoLogic.mostrarMazo(mazo);
-        getService(MultiplayerService.class).spawn(conexion, mazo, "mazo");
-        Entity carta_inicial = spawn("carta_inicial");
-        getService(MultiplayerService.class).spawn(conexion, carta_inicial, "carta_inicial");
-
+        
         // Manejar mensajes recibidos
         conexion.addMessageHandlerFX((connection, bundle) -> {
-
             switch (bundle.getName()) {
                 case "Repartir":
                     System.out.println("Ejecutando repartir cartas");
@@ -78,6 +78,13 @@ public class ServerGameApp extends GameApplication implements Serializable{
                     respuestaRobar.put("carta", (Serializable) carta);
                     connection.send(respuestaRobar);
                     break;
+                
+                case "Carta a jugar":
+                    System.out.println("Ejecutando carta a jugar");
+                    Carta carta_jugada = (Carta) bundle.get("carta"); //la carta jugada por el jugador al jugarla
+                    getGameWorld().getEntitiesByType(GameFactory.EntityType.CARTA_INICIAL).forEach(Entity::removeFromWorld);
+                    getService(MultiplayerService.class).spawn(conexion, UnoLogic.jugarCarta(carta_jugada), "carta_inicial");     
+                    break;   
             }
 
         });

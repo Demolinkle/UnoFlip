@@ -7,8 +7,9 @@ import com.almasb.fxgl.entity.SpawnData;
 import com.almasb.fxgl.entity.Spawns;
 import com.almasb.fxgl.multiplayer.NetworkComponent;
 import com.almasb.fxgl.net.Connection;
+
+import component.Carta;
 import component.MazoComponent;
-import component.UnoLogic;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -24,7 +25,7 @@ public class GameFactory implements EntityFactory {
     }
 
     public enum EntityType {
-        CARTA_LUZ, CARTA_OSCURIDAD, MAZO, CARTA_INICIAL, CARTA_MAZO
+        CARTA, CARTA_OSCURIDAD, MAZO, CARTA_INICIAL, CARTA_MAZO
     }
 
     private static final List<String> imagenesCartaLuz = new ArrayList<>();
@@ -43,7 +44,7 @@ public class GameFactory implements EntityFactory {
     @Spawns("carta_luz")
     public Entity nuevaCarta1(SpawnData data) {
         return entityBuilder(data)
-            .type(EntityType.CARTA_LUZ)
+            .type(EntityType.CARTA)
             //.viewWithBBox(80, 130))
             .with(new MazoComponent())
             .with(new NetworkComponent())
@@ -72,13 +73,15 @@ public class GameFactory implements EntityFactory {
 
 
     @Spawns("carta_inicial")
-    public Entity crearMazoJugador(SpawnData data) {
-        return entityBuilder(data)
-            .type(EntityType.CARTA_INICIAL) 
-            .viewWithBBox(texture("1.png", 60, 100))
-            .with(new MazoComponent())
-            .at(700,300)
+    public Entity carta_inicial(SpawnData data) {
+        MazoComponent mazoComponent = mazo.getComponent(MazoComponent.class);
+        Carta primeraCarta = mazoComponent.getCartas().get(0);
+        Entity cartaInicial = entityBuilder()
+            .type(GameFactory.EntityType.CARTA_INICIAL)// luz/verde/5.png
             .with(new NetworkComponent())
-            .build();
+            .view(texture(String.format("luz/%s/%s.png", primeraCarta.getColor(), primeraCarta.getId()), 60, 100))
+            .at(700,300)
+            .build();    
+        return cartaInicial;  
     }
 }
