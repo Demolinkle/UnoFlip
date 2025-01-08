@@ -1,11 +1,12 @@
 package GameSettings;
 
+import com.almasb.fxgl.core.serialization.Bundle;
 import com.almasb.fxgl.entity.EntityFactory;
 import com.almasb.fxgl.entity.Entity;
 import com.almasb.fxgl.entity.SpawnData;
 import com.almasb.fxgl.entity.Spawns;
 import com.almasb.fxgl.multiplayer.NetworkComponent;
-
+import com.almasb.fxgl.net.Connection;
 import component.MazoComponent;
 import component.UnoLogic;
 
@@ -17,8 +18,13 @@ import static com.almasb.fxgl.dsl.FXGL.*;
 
 public class GameFactory implements EntityFactory {
 
+    private Connection<Bundle> conexion;
+    public GameFactory(Connection<Bundle> conexion) {
+        this.conexion = conexion;
+    }
+
     public enum EntityType {
-        CARTA_LUZ, CARTA_OSCURIDAD, MAZO, CARTA_INICIAL
+        CARTA_LUZ, CARTA_OSCURIDAD, MAZO, CARTA_INICIAL, CARTA_MAZO
     }
 
     private static final List<String> imagenesCartaLuz = new ArrayList<>();
@@ -52,12 +58,12 @@ public class GameFactory implements EntityFactory {
                 .with(new MazoComponent())
                 .with(new NetworkComponent())
                 .onClick(e -> {
-                    // Aquí debes crear una instancia de UnoLogic
-                    Entity cartaInicial = getGameWorld().getEntitiesByType(EntityType.CARTA_INICIAL).get(0); // Obtener la carta inicial
-                    UnoLogic unoLogic = new UnoLogic(cartaInicial); // Crear la instancia de UnoLogic
-
-                    // Llamar a mostrarCartas pasándole ambos parámetros
-                    UnoLogic.mostrarCartas(e, unoLogic); 
+                    //Entity cartaInicial = getGameWorld().getEntitiesByType(EntityType.CARTA_INICIAL).get(0); 
+                    //UnoLogic unoLogic = new UnoLogic(cartaInicial);
+                    //UnoLogic.mostrarCartas(e, unoLogic)
+                    //UnoLogic.robarCarta();
+                    Bundle bundle = new Bundle("Robar una carta");
+                    this.conexion.send(bundle);
                 })
                 .build();
         

@@ -3,15 +3,18 @@ package GameSettings;
 import com.almasb.fxgl.app.GameApplication;
 import com.almasb.fxgl.app.GameSettings;
 import com.almasb.fxgl.core.serialization.Bundle;
-//import com.almasb.fxgl.entity.Entity;
-import com.almasb.fxgl.input.Input;
+import com.almasb.fxgl.entity.Entity;
+//import com.almasb.fxgl.input.Input;
 import com.almasb.fxgl.net.Connection;
-
-//import component.UnoLogic;
+import java.util.List;
+import component.Carta;
+import java.util.ArrayList;
+import component.UnoLogic;
 
 import com.almasb.fxgl.multiplayer.MultiplayerService;
-import javafx.scene.input.MouseButton;
 import static com.almasb.fxgl.dsl.FXGL.*;
+
+import javafx.scene.input.MouseButton;
 
 public class ClientApp extends GameApplication {
 
@@ -19,7 +22,8 @@ public class ClientApp extends GameApplication {
     private final int altoPantalla = 700;
     //multiplayer
     private Connection<Bundle> conexion;
-    private Input clientInput;
+    private List<Carta> manoJugador = new ArrayList<>();
+    //private List<Carta> manoJugador = new List<>();
 
     @Override
     protected void initSettings(GameSettings gameSettings) {
@@ -31,11 +35,10 @@ public class ClientApp extends GameApplication {
 
     @Override
     protected void initGame() {
-        getGameWorld().addEntityFactory(new GameFactory());
-        
         var client = getNetService().newTCPClient("localhost", 55555);
         client.setOnConnected(conn -> {
             conexion = conn;
+            getGameWorld().addEntityFactory(new GameFactory(conexion));
             getExecutor().startAsyncFX(() -> onClient());
         });
         System.out.println("Cliente conectado");
@@ -43,18 +46,37 @@ public class ClientApp extends GameApplication {
     }
 
     private void onClient() {
+
         getService(MultiplayerService.class).addEntityReplicationReceiver(conexion, getGameWorld());
         getService(MultiplayerService.class).addInputReplicationSender(conexion, getInput());
         getService(MultiplayerService.class).addPropertyReplicationReceiver(conexion, getWorldProperties());
+        //
+
+        // Manejar mensajes recibidos
+        conexion.addMessageHandlerFX((conexion, bundle) -> {
+
+            switch (bundle.getName()) {
+                case "Mano inicial":
+                    //@SuppressWarnings("unchecked")
+                    manoJugador = bundle.get("cartas");
+                    UnoLogic.mostrarMano(manoJugador);
+                    break;
+            
+                case "Carta robada":
+                    Carta cartaRobada = (Carta) bundle.get("carta");
+                    getGameWorld().getEntitiesByType(GameFactory.EntityType.CARTA_MAZO).forEach(Entity::removeFromWorld);
+                    manoJugador.add(cartaRobada);
+                    UnoLogic.mostrarMano(manoJugador);
+                    break;
+            }
+        });
     }
 
     @Override
     protected void initInput() {
-        clientInput = new Input();
-
-        onBtnDown(MouseButton.PRIMARY, () -> {
-            System.out.println("Boton");
-            Bundle bundle = new Bundle("MouseClick");
+        onBtnDown(MouseButton.SECONDARY, () -> {
+            System.out.println("Click derecho");
+            Bundle bundle = new Bundle("Repartir");
             conexion.send(bundle);
         });
     }
