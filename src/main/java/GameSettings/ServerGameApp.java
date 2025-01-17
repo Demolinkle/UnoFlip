@@ -22,9 +22,10 @@ import component.UnoLogic;
 public class ServerGameApp extends GameApplication implements Serializable{
     private final int anchoPantalla = 1400;
     private final int altoPantalla = 700;
-    private Entity mazo;
+    private static Entity mazo;
     //multiplayer
     private Connection<Bundle> conexion;
+    private Carta carta_del_servidor;
 
     @Override
     protected void initSettings(GameSettings gameSettings) {
@@ -36,24 +37,25 @@ public class ServerGameApp extends GameApplication implements Serializable{
 
     @Override
     protected void initGame() {
-        getGameWorld().addEntityFactory(new GameFactory(conexion));
-
+    
         var server = getNetService().newTCPServer(55555);
         server.setOnConnected(conn -> {
             conexion = conn;
+            getGameWorld().addEntityFactory(new GameFactory(conexion));
             getExecutor().startAsyncFX(this::onServer);
         });
-
         System.out.println("Servidor creado");
         server.startAsync();
     }
 
-    private void onServer() {
+    public void onServer() {
         mazo = spawn("mazo");
-        Entity auxiliar = spawn("carta_inicial"); 
-        // carta_inicial = spawn(cartainicial)
-        getService(MultiplayerService.class).spawn(conexion, mazo, "mazo"); //TODO: se puede modificar para que unicamente sea una carta volteada
+        
+        getService(MultiplayerService.class).spawn(conexion, mazo, "mazo"); 
         getService(MultiplayerService.class).spawn(conexion, UnoLogic.iniciarJuego(mazo), "mazo");
+        //spawn("carta_inicial"); 
+        getGameWorld().spawn("carta_inicial");
+        carta_del_servidor = mazo.getComponent(MazoComponent.class).robarCarta();
         UnoLogic.mostrarMazo(mazo);
         
         // Manejar mensajes recibidos
@@ -80,10 +82,15 @@ public class ServerGameApp extends GameApplication implements Serializable{
                     break;
                 
                 case "Carta a jugar":
+                    // el servidor recibe una variable de clase carta con los datos que quiere usar
                     System.out.println("Ejecutando carta a jugar");
-                    Carta carta_jugada = (Carta) bundle.get("carta"); //la carta jugada por el jugador al jugarla
+                    Carta carta_del_jugador = (Carta) bundle.get("carta"); //la carta jugada por el jugador al jugarla
+
+                    // logica del juego
+                    carta_del_servidor = UnoLogic.jugarCarta(carta_del_servidor, carta_del_jugador, conexion);
+
                     getGameWorld().getEntitiesByType(GameFactory.EntityType.CARTA_INICIAL).forEach(Entity::removeFromWorld);
-                    getService(MultiplayerService.class).spawn(conexion, UnoLogic.jugarCarta(carta_jugada), "carta_inicial");     
+                    getService(MultiplayerService.class).spawn(conexion, UnoLogic.jugarCarta(carta_del_jugador), "carta_inicial");     
                     break;   
             }
 
@@ -99,5 +106,8 @@ public class ServerGameApp extends GameApplication implements Serializable{
         */
     }
     
+    public static Entity getMazo() {
+        return mazo;
+    }
 
 }

@@ -20,6 +20,7 @@ import static com.almasb.fxgl.dsl.FXGL.*;
 public class GameFactory implements EntityFactory {
 
     private Connection<Bundle> conexion;
+
     public GameFactory(Connection<Bundle> conexion) {
         this.conexion = conexion;
     }
@@ -59,10 +60,6 @@ public class GameFactory implements EntityFactory {
                 .with(new MazoComponent())
                 .with(new NetworkComponent())
                 .onClick(e -> {
-                    //Entity cartaInicial = getGameWorld().getEntitiesByType(EntityType.CARTA_INICIAL).get(0); 
-                    //UnoLogic unoLogic = new UnoLogic(cartaInicial);
-                    //UnoLogic.mostrarCartas(e, unoLogic)
-                    //UnoLogic.robarCarta();
                     Bundle bundle = new Bundle("Robar una carta");
                     this.conexion.send(bundle);
                 })
@@ -71,17 +68,22 @@ public class GameFactory implements EntityFactory {
         return mazoEntity;
     }
 
-
     @Spawns("carta_inicial")
     public Entity carta_inicial(SpawnData data) {
+        Entity mazo = ServerGameApp.getMazo();
         MazoComponent mazoComponent = mazo.getComponent(MazoComponent.class);
         Carta primeraCarta = mazoComponent.getCartas().get(0);
         Entity cartaInicial = entityBuilder()
-            .type(GameFactory.EntityType.CARTA_INICIAL)// luz/verde/5.png
+            .type(GameFactory.EntityType.CARTA_INICIAL)
             .with(new NetworkComponent())
             .view(texture(String.format("luz/%s/%s.png", primeraCarta.getColor(), primeraCarta.getId()), 60, 100))
-            .at(700,300)
-            .build();    
-        return cartaInicial;  
+            .at(700, 300)
+            .build();
+        // se envia una copia de la carta a los jugadores     
+        Bundle bundle = new Bundle("Carta inicial del juego");
+        bundle.put("carta", primeraCarta);
+        this.conexion.send(bundle);     
+          
+        return cartaInicial;
     }
 }

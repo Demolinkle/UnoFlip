@@ -9,6 +9,7 @@ import com.almasb.fxgl.net.Connection;
 import java.util.List;
 import component.Carta;
 import java.util.ArrayList;
+import java.io.Serializable;
 import component.UnoLogic;
 
 import com.almasb.fxgl.multiplayer.MultiplayerService;
@@ -48,31 +49,50 @@ public class ClientApp extends GameApplication {
     }
 
     private void onClient() {
-
         getService(MultiplayerService.class).addEntityReplicationReceiver(conexion, getGameWorld());
         getService(MultiplayerService.class).addInputReplicationSender(conexion, getInput());
         getService(MultiplayerService.class).addPropertyReplicationReceiver(conexion, getWorldProperties());
-        //
-
-        // Manejar mensajes recibidos
         conexion.addMessageHandlerFX((conexion, bundle) -> {
-
             switch (bundle.getName()) {
                 case "Mano inicial":
                     manoJugador = bundle.get("cartas");
                     UnoLogic.mostrarMano(manoJugador, conexion);
                     break;
-            
+
                 case "Carta robada":
                     Carta cartaRobada = (Carta) bundle.get("carta");
                     getGameWorld().getEntitiesByType(GameFactory.EntityType.CARTA_MAZO).forEach(Entity::removeFromWorld);
                     manoJugador.add(cartaRobada);
                     UnoLogic.mostrarMano(manoJugador, conexion);
                     break;
+                    
+                case "Carta inicial del juego":
+                    Carta carta_inicial = (Carta) bundle.get("carta");
+                    Entity carta = entityBuilder()
+                    .type(GameFactory.EntityType.CARTA)
+                    .viewWithBBox(texture(String.format("luz/%s/%s.png", carta_inicial.getColor(), carta_inicial.getId()), 60, 100))
+                    .at(700, 300)
+                    .onClick(e -> {
+                        Bundle mensaje = new Bundle("Carta a jugar");
+                        mensaje.put("carta", (Serializable) carta_inicial);
+                        conexion.send(mensaje);      
+                    })
+                    .build();
+                    getGameWorld().addEntity(carta);
+                    break;
+
+                case "Nueva carta":
+                    Carta aux = (Carta) bundle.get("carta");
+                    Entity carta_nueva = entityBuilder()
+                    .type(GameFactory.EntityType.CARTA)
+                    .viewWithBBox(texture(String.format("luz/%s/%s.png", aux.getColor(), aux.getId()), 60, 100))
+                    .at(700, 300)
+                    .build();
+                    getGameWorld().addEntity(carta_nueva);
+                    break;    
             }
         });
     }
-
     @Override
     protected void initInput() {
 

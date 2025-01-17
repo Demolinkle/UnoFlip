@@ -7,15 +7,14 @@ import com.almasb.fxgl.net.Connection;
 import com.almasb.fxgl.multiplayer.NetworkComponent;
 import static com.almasb.fxgl.dsl.FXGL.*;
 import GameSettings.GameFactory;
-import GameSettings.GameFactory.EntityType;
-import javafx.scene.input.MouseButton;
-import component.MazoComponent;
+
 import java.io.Serializable;
 import java.util.List;
 import java.util.ArrayList;
 
 
-public class UnoLogic extends Component {
+
+public class UnoLogic extends Component implements Serializable {
 
     private static final int MAX_CARTAS_POR_FILA = 10;
     private static final double ESPACIADO_HORIZONTAL = 55;
@@ -23,7 +22,7 @@ public class UnoLogic extends Component {
     private Entity cartaInicial;
     private List<Entity> cartasMovidas; 
 
-
+    // Constructor
     public UnoLogic(Entity cartaInicial) {
         this.cartaInicial = cartaInicial;
         this.cartasMovidas = new ArrayList<>(); 
@@ -60,10 +59,11 @@ public class UnoLogic extends Component {
                 }
             });
 
-            getGameWorld().addEntity(cartaEntity);
+            
+            
         }
     }
-    */
+    
 
     private void moverCarta(Entity carta) {
         carta.setPosition(cartaInicial.getPosition());
@@ -78,6 +78,7 @@ public class UnoLogic extends Component {
             cartasMovidas.remove(0);
         }
     }
+    */
 
     public static void mostrarMano(List<Carta> cartas, Connection<Bundle> conexion) {
         double startX = 50;
@@ -144,4 +145,33 @@ public class UnoLogic extends Component {
 
         return cartaJugada;
     }
+
+    private static boolean esValido(Carta carta_del_servidor, Carta carta_del_jugador) {
+        if (carta_del_servidor.getColor().equals(carta_del_jugador.getColor()) || carta_del_servidor.getId() == carta_del_jugador.getId() || carta_del_jugador.getColor().equals("especial")) {
+            return true;
+        }
+        return false;
+    }
+
+    public static Carta jugarCarta(Carta carta_del_servidor, Carta carta_del_jugador, Connection<Bundle> conexion) {
+        if (esValido(carta_del_servidor, carta_del_jugador)) {
+            // actualizar la carta del servidor
+            getGameWorld().getEntitiesByType(GameFactory.EntityType.CARTA_INICIAL).forEach(Entity::removeFromWorld);
+            carta_del_servidor = carta_del_jugador;
+            Entity carta_nueva = entityBuilder()
+                .type(GameFactory.EntityType.CARTA_INICIAL)
+                .with(new NetworkComponent())
+                .view(texture(String.format("luz/%s/%s.png", carta_del_servidor.getColor(), carta_del_servidor.getId()), 60, 100))
+                .at(700, 300)
+                .build();
+            Bundle bundle = new Bundle("Nueva carta");
+            getGameWorld().addEntity(carta_nueva);
+            bundle.put("carta", (Serializable) carta_del_servidor);
+            conexion.send(bundle);
+        }  else {
+            System.out.println("No puedes jugar esta carta :D");
+        }
+        return carta_del_servidor;
+    }
+    
 }
