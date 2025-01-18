@@ -9,7 +9,8 @@ import com.almasb.fxgl.net.Connection;
 import java.util.List;
 import component.Carta;
 import java.util.ArrayList;
-import java.io.Serializable;
+
+import component.GameFactory;
 import component.UnoLogic;
 
 import com.almasb.fxgl.multiplayer.MultiplayerService;
@@ -41,21 +42,20 @@ public class ClientApp extends GameApplication {
         var client = getNetService().newTCPClient("localhost", 55555);
         client.setOnConnected(conn -> {
             conexion = conn;
-            getGameWorld().addEntityFactory(new GameFactory(conexion));
+            //getGameWorld().addEntityFactory(new GameFactory());
             getExecutor().startAsyncFX(() -> onClient());
+            System.out.println("Cliente conectado");
         });
-        System.out.println("Cliente conectado");
         client.connectAsync();
     }
 
     private void onClient() {
-        getService(MultiplayerService.class).addEntityReplicationReceiver(conexion, getGameWorld());
-        getService(MultiplayerService.class).addInputReplicationSender(conexion, getInput());
-        getService(MultiplayerService.class).addPropertyReplicationReceiver(conexion, getWorldProperties());
+        //UnoLogic.getJuego(conexion);
+        // manejo de mensajes recibidos
         conexion.addMessageHandlerFX((conexion, bundle) -> {
             switch (bundle.getName()) {
                 case "Mano inicial":
-                    manoJugador = bundle.get("cartas");
+                    manoJugador = bundle.get("carta");
                     UnoLogic.mostrarMano(manoJugador, conexion);
                     break;
 
@@ -65,37 +65,27 @@ public class ClientApp extends GameApplication {
                     manoJugador.add(cartaRobada);
                     UnoLogic.mostrarMano(manoJugador, conexion);
                     break;
-                    
-                case "Carta inicial del juego":
+
+                case "Nueva carta del servidor":
                     Carta carta_inicial = (Carta) bundle.get("carta");
-                    Entity carta = entityBuilder()
-                    .type(GameFactory.EntityType.CARTA)
-                    .viewWithBBox(texture(String.format("luz/%s/%s.png", carta_inicial.getColor(), carta_inicial.getId()), 60, 100))
-                    .at(700, 300)
-                    .onClick(e -> {
-                        Bundle mensaje = new Bundle("Carta a jugar");
-                        mensaje.put("carta", (Serializable) carta_inicial);
-                        conexion.send(mensaje);      
-                    })
-                    .build();
-                    getGameWorld().addEntity(carta);
+                    UnoLogic.mostrarCarta(carta_inicial);
                     break;
 
                 case "Nueva carta":
                     Carta aux = (Carta) bundle.get("carta");
-                    Entity carta_nueva = entityBuilder()
-                    .type(GameFactory.EntityType.CARTA)
-                    .viewWithBBox(texture(String.format("luz/%s/%s.png", aux.getColor(), aux.getId()), 60, 100))
-                    .at(700, 300)
-                    .build();
-                    getGameWorld().addEntity(carta_nueva);
-                    break;    
+                    UnoLogic.mostrarCarta(aux);
+                    break;
+
+                case "Eliminar carta":
+                    Carta carta = (Carta) bundle.get("carta");
+                    manoJugador = UnoLogic.removerCarta(manoJugador, carta);
+                    UnoLogic.mostrarMano(manoJugador, conexion);
+                    break;
             }
         });
     }
     @Override
     protected void initInput() {
-
         clientInput = new Input();
 
         onBtnDown(MouseButton.SECONDARY, () -> {
@@ -103,7 +93,6 @@ public class ClientApp extends GameApplication {
             Bundle bundle = new Bundle("Repartir");
             conexion.send(bundle);
         });
-
         //onEvent(clientInput.mockButtonPress(MouseButton.PRIMARY));
     }
 }

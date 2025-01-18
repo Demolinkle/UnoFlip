@@ -1,3 +1,4 @@
+/*
 package component;
 
 import com.almasb.fxgl.entity.component.Component;
@@ -56,10 +57,6 @@ public class MazoComponent extends Component implements Serializable {
         }
         return null;
     }
-    /* 
-    public int getCartasRepartidas() {
-        return cartasRepartidas;
-    }
-    */
 
 }
+*/

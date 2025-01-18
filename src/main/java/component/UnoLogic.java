@@ -6,9 +6,9 @@ import com.almasb.fxgl.entity.component.Component;
 import com.almasb.fxgl.net.Connection;
 import com.almasb.fxgl.multiplayer.NetworkComponent;
 import static com.almasb.fxgl.dsl.FXGL.*;
-import GameSettings.GameFactory;
 
 import java.io.Serializable;
+import java.util.Collections;
 import java.util.List;
 import java.util.ArrayList;
 
@@ -58,19 +58,13 @@ public class UnoLogic extends Component implements Serializable {
                     unoLogic.eliminarCartasAnteriores(); // Eliminar cartas previas
                 }
             });
-
-            
-            
         }
     }
-    
-
     private void moverCarta(Entity carta) {
         carta.setPosition(cartaInicial.getPosition());
         cartasMovidas.add(carta);
         System.out.println("");
     }
-
     private void eliminarCartasAnteriores() {
         if (cartasMovidas.size() > 1) {
             Entity cartaAEliminar = cartasMovidas.get(0);
@@ -79,14 +73,54 @@ public class UnoLogic extends Component implements Serializable {
         }
     }
     */
+    public static List<Carta> generarMazo() {
+        List<Carta> cartas = new ArrayList<>();
+        for (int i = 1; i < 10; i++) { // Se generan las cartas numericas del mazo
+            cartas.add(new Carta("amarillo", i, "placeholder"));
+            cartas.add(new Carta("azul", i, "data"));
+            cartas.add(new Carta("rojo", i, "data"));
+            cartas.add(new Carta("verde", i, "data"));
+        }
+        Collections.shuffle(cartas);
+        return cartas;
+    }
+
+    public static void repartirCartas(List<Carta> mazo, Connection<Bundle> conexion) {
+        List<Carta> aux = new ArrayList<>();
+        for (int i = 0; i < 7; i++) {
+            if (!mazo.isEmpty()) {
+                aux.add(mazo.get(0));
+                mazo.remove(0);
+            }
+        }
+        enviarMensaje("Mano inicial", aux, conexion);
+    }
+
+    public static void enviarMensaje(String titulo, Connection<Bundle> conexion) {
+        Bundle bundle = new Bundle(titulo);
+        conexion.send(bundle);
+    }
+
+    public static void enviarMensaje(String titulo, Carta carta, Connection<Bundle> conexion) {
+        Bundle bundle = new Bundle(titulo);
+        bundle.put("carta", (Serializable) carta);
+        conexion.send(bundle);
+    }
+
+    public static void enviarMensaje(String titulo, List<Carta> cartas, Connection<Bundle> conexion) {
+        Bundle bundle = new Bundle(titulo);
+        bundle.put("carta", (Serializable) cartas);
+        conexion.send(bundle);
+    }
 
     public static void mostrarMano(List<Carta> cartas, Connection<Bundle> conexion) {
+        getGameWorld().getEntitiesByType(GameFactory.EntityType.MANO).forEach(Entity::removeFromWorld);
         double startX = 50;
         double startY = 300;
         int i = 0;
         for (Carta carta : cartas) {
             Entity aux = entityBuilder() // luz/verde/5.png
-                    .type(GameFactory.EntityType.CARTA)
+                    .type(GameFactory.EntityType.MANO)
                     .viewWithBBox(texture(String.format("luz/%s/%s.png", carta.getColor(), carta.getId()), 60, 100))
                     .onClick(e -> {
                         Bundle mensaje = new Bundle("Carta a jugar");
@@ -94,18 +128,15 @@ public class UnoLogic extends Component implements Serializable {
                         conexion.send(mensaje);      
                     })
                     .build();
-
             // Coloca la carta en la nueva posición
             aux.setPosition(startX + (i % MAX_CARTAS_POR_FILA) * ESPACIADO_HORIZONTAL, startY + (i / MAX_CARTAS_POR_FILA) * ESPACIADO_VERTICAL);
             i++;
-
             getGameWorld().addEntity(aux);
         }
     }
 
-    public static Entity iniciarJuego(Entity mazo) {
-        MazoComponent mazoComponent = mazo.getComponent(MazoComponent.class);
-        Carta primeraCarta = mazoComponent.getCartas().get(0);
+    public static Entity iniciarJuego(List<Carta> mazo) {
+        Carta primeraCarta = mazo.get(0);
         Entity cartaInicial = entityBuilder()
             .type(GameFactory.EntityType.CARTA_INICIAL)// luz/verde/5.png
             .with(new NetworkComponent())
@@ -115,25 +146,47 @@ public class UnoLogic extends Component implements Serializable {
         return cartaInicial;  
     }
 
-    public static void mostrarMazo(Entity mazo) {
-        MazoComponent mazoComponent = mazo.getComponent(MazoComponent.class);
-        List<Carta> cartas = mazoComponent.getCartas();
-
+    public static void mostrarMazo(List<Carta> mazo) {
         double startX = 50;
         double startY = 300;
         int i = 0;
-        for (Carta carta : cartas) {
+        for (Carta carta : mazo) {
             Entity aux = entityBuilder()
                     .type(GameFactory.EntityType.CARTA_MAZO)// luz/verde/5.png
                     .viewWithBBox(texture(String.format("luz/%s/%s.png", carta.getColor(), carta.getId()), 60, 100))
                     .build();
-
             // Coloca la carta en la nueva posición
             aux.setPosition(startX + (i % MAX_CARTAS_POR_FILA) * ESPACIADO_HORIZONTAL, startY + (i / MAX_CARTAS_POR_FILA) * ESPACIADO_VERTICAL);
             i++;
-
             getGameWorld().addEntity(aux);
         }
+    }
+
+    public static void mostrarCarta(Carta carta) {
+        Entity aux = entityBuilder()
+                .type(GameFactory.EntityType.CARTA)
+                .viewWithBBox(texture(String.format("luz/%s/%s.png", carta.getColor(), carta.getId()), 60, 100))
+                .at(700, 300)
+                .build();
+        getGameWorld().addEntity(aux);
+    }
+
+    public static void mostrar_Carta_del_servidor(Carta carta, Connection<Bundle> conexion) {
+        getGameWorld().getEntitiesByType(GameFactory.EntityType.CARTA_INICIAL).forEach(Entity::removeFromWorld);
+        Entity cartaServidor = entityBuilder()
+            .type(GameFactory.EntityType.CARTA_INICIAL)// luz/verde/5.png
+            .view(texture(String.format("luz/%s/%s.png", carta.getColor(), carta.getId()), 60, 100))
+            .at(700,300)
+            .build();
+        getGameWorld().addEntity(cartaServidor);
+        Bundle mensaje = new Bundle("Nueva carta del servidor");
+        mensaje.put("carta", (Serializable) carta);
+        conexion.send(mensaje);
+    }
+
+    public static void getJuego(Connection<Bundle> conexion) {
+        Bundle mensaje = new Bundle("Juego");
+        conexion.send(mensaje);
     }
 
     public static Entity jugarCarta(Carta carta) {
@@ -164,14 +217,29 @@ public class UnoLogic extends Component implements Serializable {
                 .view(texture(String.format("luz/%s/%s.png", carta_del_servidor.getColor(), carta_del_servidor.getId()), 60, 100))
                 .at(700, 300)
                 .build();
-            Bundle bundle = new Bundle("Nueva carta");
             getGameWorld().addEntity(carta_nueva);
-            bundle.put("carta", (Serializable) carta_del_servidor);
-            conexion.send(bundle);
+            enviarMensaje("Nueva carta", carta_del_servidor, conexion);
+            enviarMensaje("Eliminar carta", carta_del_jugador, conexion); // eliminar la carta del jugador de su mano
         }  else {
             System.out.println("No puedes jugar esta carta :D");
         }
         return carta_del_servidor;
     }
-    
+
+    public static List<Carta> removerCarta(List<Carta> cartas, Carta carta) {
+        for (int i = 0; i < cartas.size(); i++) {
+            if (cartas.get(i).getColor().equals(carta.getColor()) && cartas.get(i).getId() == carta.getId() && cartas.get(i).getTipo().equals(carta.getTipo())) {
+                cartas.remove(i);
+                break;
+            }
+        }
+        return cartas;
+    }
+
+    public static Carta robarCarta(List<Carta> mazo2) {
+        if (!mazo2.isEmpty()) {
+            return mazo2.remove(0);
+        }
+        return null;
+    }
 }
