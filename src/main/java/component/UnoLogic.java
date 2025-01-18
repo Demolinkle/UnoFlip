@@ -1,78 +1,23 @@
 package component;
 
-import com.almasb.fxgl.core.serialization.Bundle;
-import com.almasb.fxgl.entity.Entity;
-import com.almasb.fxgl.entity.component.Component;
-import com.almasb.fxgl.net.Connection;
 import com.almasb.fxgl.multiplayer.NetworkComponent;
+import com.almasb.fxgl.entity.component.Component;
+import com.almasb.fxgl.core.serialization.Bundle;
 import static com.almasb.fxgl.dsl.FXGL.*;
+import com.almasb.fxgl.net.Connection;
+import com.almasb.fxgl.entity.Entity;
 
-import java.io.Serializable;
 import java.util.Collections;
-import java.util.List;
+import java.io.Serializable;
 import java.util.ArrayList;
-
-
+import java.util.List;
 
 public class UnoLogic extends Component implements Serializable {
 
-    private static final int MAX_CARTAS_POR_FILA = 10;
     private static final double ESPACIADO_HORIZONTAL = 55;
     private static final double ESPACIADO_VERTICAL = 30;
-    private Entity cartaInicial;
-    private List<Entity> cartasMovidas; 
+    private static final int MAX_CARTAS_POR_FILA = 10;
 
-    // Constructor
-    public UnoLogic(Entity cartaInicial) {
-        this.cartaInicial = cartaInicial;
-        this.cartasMovidas = new ArrayList<>(); 
-    }
-/*
-    public static void mostrarCartas(Entity mazo, UnoLogic unoLogic) {
-        MazoComponent mazoComponent = mazo.getComponent(MazoComponent.class);
-        int cartasRepartidas = mazoComponent.getCartasRepartidas();
-
-        List<Carta> cartasARepartir;
-
-        if (cartasRepartidas == 0) {
-            cartasARepartir = mazoComponent.repartirCartas();
-        } else {
-            cartasARepartir = mazoComponent.repartirCartas();
-        }
-
-        double startX = 50 + (cartasRepartidas % MAX_CARTAS_POR_FILA);
-        double startY = 300 + (cartasRepartidas / MAX_CARTAS_POR_FILA) * ESPACIADO_VERTICAL;
-        int i = cartasRepartidas;
-
-        for (Carta carta : cartasARepartir) {
-            Entity cartaEntity = entityBuilder()
-                    .viewWithBBox(texture(String.format("luz/%s/%s.png", carta.getColor(), carta.getId()), 60, 100))
-                    .build();
-
-            cartaEntity.setPosition(startX + (i % MAX_CARTAS_POR_FILA) * ESPACIADO_HORIZONTAL, startY + (i / MAX_CARTAS_POR_FILA) * ESPACIADO_VERTICAL);
-            i++;
-
-            cartaEntity.getViewComponent().getChildren().get(0).setOnMouseClicked(event -> {
-                if (event.getButton() == MouseButton.PRIMARY) {
-                    unoLogic.moverCarta(cartaEntity); // Mover la carta
-                    unoLogic.eliminarCartasAnteriores(); // Eliminar cartas previas
-                }
-            });
-        }
-    }
-    private void moverCarta(Entity carta) {
-        carta.setPosition(cartaInicial.getPosition());
-        cartasMovidas.add(carta);
-        System.out.println("");
-    }
-    private void eliminarCartasAnteriores() {
-        if (cartasMovidas.size() > 1) {
-            Entity cartaAEliminar = cartasMovidas.get(0);
-            cartaAEliminar.removeFromWorld();
-            cartasMovidas.remove(0);
-        }
-    }
-    */
     public static List<Carta> generarMazo() {
         List<Carta> cartas = new ArrayList<>();
         for (int i = 1; i < 10; i++) { // Se generan las cartas numericas del mazo
@@ -200,7 +145,10 @@ public class UnoLogic extends Component implements Serializable {
     }
 
     private static boolean esValido(Carta carta_del_servidor, Carta carta_del_jugador) {
-        if (carta_del_servidor.getColor().equals(carta_del_jugador.getColor()) || carta_del_servidor.getId() == carta_del_jugador.getId() || carta_del_jugador.getColor().equals("especial")) {
+        if (carta_del_servidor.getColor().equals(carta_del_jugador.getColor()) || 
+            carta_del_servidor.getId() == carta_del_jugador.getId() || 
+            carta_del_jugador.getColor().equals("especial")) 
+            {
             return true;
         }
         return false;
@@ -235,6 +183,7 @@ public class UnoLogic extends Component implements Serializable {
         }
         return cartas;
     }
+    //click
 
     public static Carta robarCarta(List<Carta> mazo2) {
         if (!mazo2.isEmpty()) {

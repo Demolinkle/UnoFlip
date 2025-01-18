@@ -1,31 +1,30 @@
 package GameSettings;
 
-import static com.almasb.fxgl.dsl.FXGL.*;
-
-import java.io.Serializable;
-import java.util.List;
-
+import com.almasb.fxgl.multiplayer.MultiplayerService;
 import com.almasb.fxgl.core.serialization.Bundle;
 import com.almasb.fxgl.app.GameApplication;
+//import com.almasb.fxgl.entity.SpawnData;
+import static com.almasb.fxgl.dsl.FXGL.*;
 import com.almasb.fxgl.app.GameSettings;
+import com.almasb.fxgl.net.Connection;
 import com.almasb.fxgl.entity.Entity;
 
 //import javafx.scene.input.MouseButton;
-//import com.almasb.fxgl.entity.SpawnData;
-import com.almasb.fxgl.multiplayer.MultiplayerService;
-import com.almasb.fxgl.net.Connection;
+import java.io.Serializable;
+import java.util.List;
 
-import component.Carta;
 import component.GameFactory;
 import component.UnoLogic;
+import component.Carta;
 
 public class ServerGameApp extends GameApplication implements Serializable{
     private final int anchoPantalla = 1400;
     private final int altoPantalla = 700;
-    private static List<Carta> mazo;
+    //private static List<Carta> mazo;
     //multiplayer
     private Connection<Bundle> conexion;
     private Carta carta_del_servidor;
+
 
     @Override
     protected void initSettings(GameSettings gameSettings) {
@@ -37,17 +36,22 @@ public class ServerGameApp extends GameApplication implements Serializable{
 
     @Override
     protected void initGame() {
-        //getGameWorld().addEntityFactory(new GameFactory());
+        
         var server = getNetService().newTCPServer(55555);
         server.setOnConnected(conn -> {
             conexion = conn;
             getExecutor().startAsyncFX(this::onServer);
+            //Agregue aqui el gameFactory para el boton de recargar
+            getGameWorld().addEntityFactory(new GameFactory(conexion));
         });
+        
         System.out.println("Servidor creado");
         server.startAsync();
     }
     // NOTA: tal parece se genera un nuevo mazo cuando recibe una conexion nueva
     public void onServer() {
+        
+
         List <Carta> mazo = UnoLogic.generarMazo();
         carta_del_servidor = UnoLogic.robarCarta(mazo);
         UnoLogic.mostrar_Carta_del_servidor(carta_del_servidor, conexion);
@@ -82,5 +86,9 @@ public class ServerGameApp extends GameApplication implements Serializable{
                     break;
             }
         });
+    }
+
+    public  Connection<Bundle> getConexion(){
+        return conexion;
     }
 }

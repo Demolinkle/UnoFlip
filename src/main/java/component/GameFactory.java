@@ -1,35 +1,40 @@
 package component;
 
-import com.almasb.fxgl.entity.EntityFactory;
-import com.almasb.fxgl.entity.Entity;
-import com.almasb.fxgl.entity.SpawnData;
-import com.almasb.fxgl.entity.Spawns;
 import com.almasb.fxgl.multiplayer.NetworkComponent;
-
-//import component.MazoComponent;
-
-import java.io.File;
-import java.util.ArrayList;
-import java.util.List;
-
+import com.almasb.fxgl.core.serialization.Bundle;
+import com.almasb.fxgl.entity.EntityFactory;
 import static com.almasb.fxgl.dsl.FXGL.*;
+import com.almasb.fxgl.entity.SpawnData;
+import com.almasb.fxgl.net.Connection;
+import com.almasb.fxgl.entity.Entity;
+import com.almasb.fxgl.entity.Spawns;
 
 public class GameFactory implements EntityFactory {
 
     public enum EntityType {
-        CARTA, CARTA_OSCURIDAD, MAZO, CARTA_INICIAL, CARTA_MAZO, MANO
+        CARTA, CARTA_MAZO, CARTA_INICIAL, MAZO, MANO, BOTON_RECARGA
+    }
+    
+        private Connection<Bundle> conexion;
+    
+    public GameFactory(Connection<Bundle> conexion) {
+            this.conexion = conexion;
     }
 
-    private static final List<String> imagenesCartaLuz = new ArrayList<>();
-
-    static {
-        File folderLuz = new File("src/main/resources/assets/textures/luz");
-        File[] files = folderLuz.listFiles((dir, name) -> name.endsWith(".png") || name.endsWith(".PNG"));
-
-        if (files != null) {
-            for (File file : files) {
-                imagenesCartaLuz.add(file.getName());
-            }
-        }
+    @Spawns("mazo_recarga")
+    public Entity nuevaCarta1(SpawnData data) {
+        return entityBuilder(data)
+            .type(EntityType.BOTON_RECARGA)
+            .viewWithBBox(texture("carta_portada.png", 100, 100))
+            .with(new NetworkComponent())
+            .at(30, 30)
+            .onClick(e -> {
+                    System.out.println("Click izquierdo");
+                    Bundle bundle = new Bundle("Robar una carta");
+                    conexion.send(bundle);     
+                    })
+            .build();
     }
+
+
 }
