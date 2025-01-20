@@ -20,8 +20,8 @@ public class UnoLogic extends Component implements Serializable {
 
     public static List<Carta> generarMazo() {
         List<Carta> cartas = new ArrayList<>();
-        for (int i = 1; i < 10; i++) { // Se generan las cartas numericas del mazo
-            cartas.add(new Carta("amarillo", i, "placeholder"));
+        for (int i = 1; i < 14; i++) { // Se generan las cartas numericas del mazo
+            cartas.add(new Carta("amarillo", i, "data"));
             cartas.add(new Carta("azul", i, "data"));
             cartas.add(new Carta("rojo", i, "data"));
             cartas.add(new Carta("verde", i, "data"));
