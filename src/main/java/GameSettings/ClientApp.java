@@ -15,6 +15,7 @@ import java.util.List;
 
 import component.UnoLogic;
 import component.Carta;
+import component.GameFactory;
 
 public class ClientApp extends GameApplication {
 
@@ -40,7 +41,7 @@ public class ClientApp extends GameApplication {
         client.setOnConnected(conn -> {
             conexion = conn;
             
-            //getGameWorld().addEntityFactory(new GameFactory(conexion));
+            getGameWorld().addEntityFactory(new GameFactory(conexion));
             getExecutor().startAsyncFX(() -> onClient());
             System.out.println("Cliente conectado");
         });
@@ -48,7 +49,7 @@ public class ClientApp extends GameApplication {
     }
 
     private void onClient() {
-    
+        getGameWorld().spawn("mazo_recarga");
         conexion.addMessageHandlerFX((conexion, bundle) -> {
             switch (bundle.getName()) {
                 case "Mano inicial":

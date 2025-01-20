@@ -58,6 +58,12 @@ public class UnoLogic extends Component implements Serializable {
         conexion.send(bundle);
     }
 
+    public static void enviarMensaje1(String mensaje, Connection<Bundle> conexion) {
+        Bundle bundle = new Bundle("Mensaje");
+        bundle.put("mensaje", mensaje != null ? mensaje : ""); // Asegúrate de que el valor no sea nulo
+        conexion.send(bundle);
+    }
+
     public static void mostrarMano(List<Carta> cartas, Connection<Bundle> conexion) {
         getGameWorld().getEntitiesByType(GameFactory.EntityType.MANO).forEach(Entity::removeFromWorld);
         double startX = 50;
@@ -183,7 +189,6 @@ public class UnoLogic extends Component implements Serializable {
         }
         return cartas;
     }
-    //click
 
     public static Carta robarCarta(List<Carta> mazo2) {
         if (!mazo2.isEmpty()) {

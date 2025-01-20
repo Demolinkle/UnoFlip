@@ -3,13 +3,11 @@ package GameSettings;
 import com.almasb.fxgl.multiplayer.MultiplayerService;
 import com.almasb.fxgl.core.serialization.Bundle;
 import com.almasb.fxgl.app.GameApplication;
-//import com.almasb.fxgl.entity.SpawnData;
 import static com.almasb.fxgl.dsl.FXGL.*;
 import com.almasb.fxgl.app.GameSettings;
 import com.almasb.fxgl.net.Connection;
 import com.almasb.fxgl.entity.Entity;
 
-//import javafx.scene.input.MouseButton;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
@@ -22,12 +20,13 @@ public class ServerGameApp extends GameApplication implements Serializable{
     private final int anchoPantalla = 1400;
     private final int altoPantalla = 700;
     private List<Carta> mazo;
+
     //multiplayer
     private Connection<Bundle> conexion;
     private Carta carta_del_servidor;
     @SuppressWarnings("rawtypes")
     private List<Connection> conexiones = new ArrayList<>();
-
+    private int turnoActual = 0;
 
     @Override
     protected void initSettings(GameSettings gameSettings) {
@@ -53,10 +52,11 @@ public class ServerGameApp extends GameApplication implements Serializable{
         server.startAsync();
     }
    
+    @SuppressWarnings({ "rawtypes", "unchecked" })
     public void onServer() {
         UnoLogic.mostrar_Carta_del_servidor(carta_del_servidor, conexion);
         UnoLogic.mostrarMazo(mazo);
-
+        
         conexion.addMessageHandlerFX((connection, bundle) -> {
             switch (bundle.getName()) {
                 case "Repartir":
@@ -73,23 +73,26 @@ public class ServerGameApp extends GameApplication implements Serializable{
                     UnoLogic.enviarMensaje("Carta robada", carta, connection);
                     break;
 
-                case "Carta a jugar":
-                    Carta carta_del_jugador = (Carta) bundle.get("carta");
-                    carta_del_servidor = UnoLogic.jugarCarta(carta_del_servidor, carta_del_jugador, connection);
-                    UnoLogic.mostrar_Carta_del_servidor(carta_del_servidor, connection);
-                    // confia
-                    for (Connection conn : conexiones) {
-                        UnoLogic.enviarMensaje("Nueva carta del servidor", carta_del_servidor, conn);
+                    case "Carta a jugar":
+                    // Verificar si es el turno del cliente
+                    if (conexiones.indexOf(connection) == turnoActual) {
+                        Carta carta_del_jugador = (Carta) bundle.get("carta");
+                        carta_del_servidor = UnoLogic.jugarCarta(carta_del_servidor, carta_del_jugador, connection);
+                        UnoLogic.mostrar_Carta_del_servidor(carta_del_servidor, connection);
+                        // Enviar mensaje de actualizacion a todas las conexiones
+                        for (Connection conn : conexiones) {
+                            UnoLogic.enviarMensaje("Nueva carta del servidor", carta_del_servidor, conn);
+                        }
+                        // Cambiar el turno al siguiente cliente
+                        turnoActual = (turnoActual + 1) % conexiones.size();
+                    } else {
+                        // Enviar mensaje de que no es el turno del cliente
+                        UnoLogic.enviarMensaje1("No es tu turno", conexion);
+                        System.out.println("No es tu turno");
                     }
                     break;
             }
         });
-
-        // Agregar la conexión a la lista de conexiones
         conexiones.add(conexion);
-    }
-    
-    public  Connection<Bundle> getConexion(){
-        return conexion;
     }
 }
