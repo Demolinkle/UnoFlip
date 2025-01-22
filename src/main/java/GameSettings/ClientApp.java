@@ -49,6 +49,7 @@ public class ClientApp extends GameApplication {
     }
 
     private void onClient() {
+        getGameWorld().spawn("fondo");
         getGameWorld().spawn("mazo_recarga");
         conexion.addMessageHandlerFX((conexion, bundle) -> {
             switch (bundle.getName()) {
