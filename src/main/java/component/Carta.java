@@ -3,7 +3,6 @@ package component;
 import java.io.Serializable;
 
 public class Carta implements Serializable {
-    private static final long serialVersionUID = 1L;
     private String color;
     private int id;
     private String tipo;

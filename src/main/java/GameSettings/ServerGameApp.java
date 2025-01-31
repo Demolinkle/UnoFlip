@@ -8,10 +8,12 @@ import com.almasb.fxgl.app.GameSettings;
 import com.almasb.fxgl.net.Connection;
 import com.almasb.fxgl.entity.Entity;
 
+import java.util.Collections;
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.Collections;
+import java.util.Scanner;
 import java.util.List;
+
 
 import component.GameFactory;
 import component.UnoLogic;
@@ -78,53 +80,79 @@ public class ServerGameApp extends GameApplication implements Serializable{
                     //Verificar si es el turno del cliente
                     if (conexiones.indexOf(connection) == turnoActual) {
                         Carta carta_del_jugador = (Carta) bundle.get("carta");
-                        carta_del_servidor = UnoLogic.jugarCarta(carta_del_servidor, carta_del_jugador, connection);
-                        UnoLogic.mostrar_Carta_del_servidor(carta_del_servidor, connection);
-                        
-                        //Logica para la carta +1
-                        if (carta_del_jugador.getId() == 11) {
-                            // Obligar al siguiente jugador a robar una carta
-                            int siguienteTurno = (turnoActual + 1) % conexiones.size();
-                            Connection siguienteConexion = conexiones.get(siguienteTurno);
-                            Carta cartaRobada = UnoLogic.robarCarta(mazo);
-                            UnoLogic.enviarMensaje("Carta robada", cartaRobada, siguienteConexion);
-                            turnoActual = (siguienteTurno + 1) % conexiones.size(); 
-                            System.out.println("Carta +1");
-                        } 
-                        //Logica para la carta skip
-                        else if (carta_del_jugador.getId() == 12) {
-                            turnoActual = (turnoActual + 2) % conexiones.size();
-                            System.out.println("Skipear turno");
-                            for (Connection conn : conexiones) {
-                                UnoLogic.enviarMensaje("Nueva carta del servidor", carta_del_servidor, conn);
+                        if (!UnoLogic.esValido(carta_del_servidor, carta_del_jugador)) {
+                            UnoLogic.enviarMensaje("No puedes jugar esa carta", connection);
+                        } else {
+                            carta_del_servidor = UnoLogic.jugarCarta(carta_del_servidor, carta_del_jugador, connection);
+                            UnoLogic.mostrar_Carta_del_servidor(carta_del_servidor, connection);
+                            //put
+                            //Logica para la carta +1
+                            if (carta_del_jugador.getId() == 11) {
+                                // Obligar al siguiente jugador a robar una carta
+                                int siguienteTurno = (turnoActual + 1) % conexiones.size();
+                                Connection siguienteConexion = conexiones.get(siguienteTurno);
+                                Carta cartaRobada = UnoLogic.robarCarta(mazo);
+                                UnoLogic.enviarMensaje("Carta robada", cartaRobada, siguienteConexion);
+                                turnoActual = (siguienteTurno + 1) % conexiones.size();
+                                System.out.println("Carta +1");
                             }
-                        }
-                        //Logica para la carta swap
-                        else if (carta_del_jugador.getId() == 13) {
-                            Collections.reverse(conexiones);
-                            System.out.println("Invertir dirección de turnos");
-                            if (conexiones.size() == 2) {
+                            //Logica para la carta skip
+                            else if (carta_del_jugador.getId() == 12) {
+                                turnoActual = (turnoActual + 2) % conexiones.size();
+                                System.out.println("Skipear turno");
+                                for (Connection conn : conexiones) {
+                                    UnoLogic.enviarMensaje("Nueva carta del servidor", carta_del_servidor, conn);
+                                }
+                            }
+                            //Logica para la carta swap
+                            else if (carta_del_jugador.getId() == 13) {
+                                Collections.reverse(conexiones);
+                                System.out.println("Invertir dirección de turnos");
+                                if (conexiones.size() == 2) {
+                                    turnoActual = (turnoActual + 1) % conexiones.size();
+                                } else {
+                                    turnoActual = (turnoActual + conexiones.size() - 1) % conexiones.size();
+                                }
+                                for (Connection conn : conexiones) {
+                                    UnoLogic.enviarMensaje("Nueva carta del servidor", carta_del_servidor, conn);
+                                }
+                            }
+                            else {
+                                for (Connection conn : conexiones) {
+                                    UnoLogic.enviarMensaje("Nueva carta del servidor", carta_del_servidor, conn);
+                                }
                                 turnoActual = (turnoActual + 1) % conexiones.size();
-                            } else {
-                                turnoActual = (turnoActual + conexiones.size() - 1) % conexiones.size();
-                            }
-                            for (Connection conn : conexiones) {
-                                UnoLogic.enviarMensaje("Nueva carta del servidor", carta_del_servidor, conn);
                             }
                         }
-                        else {
-                            for (Connection conn : conexiones) {
-                                UnoLogic.enviarMensaje("Nueva carta del servidor", carta_del_servidor, conn);
-                            }
-                            turnoActual = (turnoActual + 1) % conexiones.size();
-                        }
-                    } else {
-                        UnoLogic.enviarMensaje1("No es tu turno", connection);
+                    } else { // No es el turno del cliente
+                        UnoLogic.enviarMensaje("No es tu turno", connection);
                         System.out.println("No es tu turno");
                     }
                     break;
+
+                case "Victoria":
+                    for (Connection<Bundle> conn : conexiones) {
+                        if (conn != connection) {
+                            Bundle mensaje = new Bundle("Derrota");
+                            conn.send(mensaje);
+                        }
+                    }
+                    break;
+
+                case "Se ha cambiado el color":
+                    String color = bundle.get("carta");
+                    for (Connection<Bundle> conn : conexiones) {
+                        if (conn != connection) {
+                            
+
+                            UnoLogic.enviarMensaje("Color nuevo", color, connection);
+                        }
+                    }
+                    break;
+                
             }
         });
         conexiones.add(conexion);
-}
+    }
+    
 }

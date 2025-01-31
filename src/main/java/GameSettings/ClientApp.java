@@ -7,20 +7,24 @@ import static com.almasb.fxgl.dsl.FXGL.*;
 import com.almasb.fxgl.app.GameSettings;
 import com.almasb.fxgl.net.Connection;
 
+import javafx.scene.control.Button;
+
 //import com.almasb.fxgl.input.Input;
 
 import javafx.scene.input.MouseButton;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Scanner;
 
+import component.GameFactory;
 import component.UnoLogic;
 import component.Carta;
-import component.GameFactory;
 
 public class ClientApp extends GameApplication {
 
     private final int anchoPantalla = 1400;
     private final int altoPantalla = 700;
+    private List<Button> colorButtons = new ArrayList<>();
     //multiplayer
     //private Input clientInput;
     private Connection<Bundle> conexion;
@@ -64,12 +68,8 @@ public class ClientApp extends GameApplication {
                     UnoLogic.mostrarMano(manoJugador, conexion);
                     break;
     
-                case "Nueva carta del servidor":
-                    Carta carta_inicial = (Carta) bundle.get("carta");
-                    UnoLogic.mostrarCarta(carta_inicial);
-                    break;
-    
                 case "Nueva carta":
+                    System.out.println("papa");
                     Carta aux = (Carta) bundle.get("carta");
                     UnoLogic.mostrarCarta(aux);
                     break;
@@ -78,10 +78,30 @@ public class ClientApp extends GameApplication {
                     Carta carta = (Carta) bundle.get("carta");
                     manoJugador = UnoLogic.removerCarta(manoJugador, carta);
                     UnoLogic.mostrarMano(manoJugador, conexion);
+                    victoria(manoJugador);
+                    break;
+
+                case "Derrota":
+                    getDialogService().showMessageBox("¡Has perdido!", () -> {
+                        //getGameController().exit();
+                    });
+                    break;
+
+                case "Color nuevo":
+                    // Mostrar los botones para elegir color
+                    String colorNuevo = bundle.get("carta");
+                    getDialogService().showMessageBox("Color nuevo: " + colorNuevo, () -> {
+                        //getGameController().exit();
+                    });
+                   
+                    break;
+                case "No puedes jugar esa carta":
+                    getDialogService().showMessageBox("No puedes jugar esa carta", () -> {});
                     break;
             }
         });
     }
+    
     @Override
     protected void initInput() {
         //clientInput = new Input();
@@ -94,4 +114,23 @@ public class ClientApp extends GameApplication {
 
         //onEvent(clientInput.mockButtonPress(MouseButton.PRIMARY));
     }
+
+    public void victoria(List<Carta> manoJugador) {
+        if (manoJugador.isEmpty()) {
+            Bundle bundle = new Bundle("Victoria");
+            conexion.send(bundle);
+            getDialogService().showMessageBox("¡Has ganado!", () -> {
+                //getGameController().exit();
+            });
+        }
+    }
+
+    
+    
+   
+
+    
+
+
+
 }
