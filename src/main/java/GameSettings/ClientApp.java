@@ -6,15 +6,12 @@ import com.almasb.fxgl.app.GameApplication;
 import static com.almasb.fxgl.dsl.FXGL.*;
 import com.almasb.fxgl.app.GameSettings;
 import com.almasb.fxgl.net.Connection;
-
-import javafx.scene.control.Button;
-
 //import com.almasb.fxgl.input.Input;
 
 import javafx.scene.input.MouseButton;
+//import javafx.scene.input.KeyCode;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Scanner;
 
 import component.GameFactory;
 import component.UnoLogic;
@@ -24,7 +21,6 @@ public class ClientApp extends GameApplication {
 
     private final int anchoPantalla = 1400;
     private final int altoPantalla = 700;
-    private List<Button> colorButtons = new ArrayList<>();
     //multiplayer
     //private Input clientInput;
     private Connection<Bundle> conexion;
@@ -67,6 +63,15 @@ public class ClientApp extends GameApplication {
                     manoJugador.add(cartaRobada);
                     UnoLogic.mostrarMano(manoJugador, conexion);
                     break;
+
+                case "Activa":
+                    UnoLogic.enviarMensaje("Flip", conexion);
+                    break;
+                
+                case "Nueva carta del servidor":
+                    Carta carta_inicial = (Carta) bundle.get("carta");
+                    UnoLogic.mostrarCarta(carta_inicial);
+                    break;
     
                 case "Nueva carta":
                     System.out.println("papa");
@@ -95,8 +100,14 @@ public class ClientApp extends GameApplication {
                     });
                    
                     break;
+
                 case "No puedes jugar esa carta":
                     getDialogService().showMessageBox("No puedes jugar esa carta", () -> {});
+                    break;
+
+                case "Voltear cartas":
+                    UnoLogic.voltearCartas(manoJugador);
+                    UnoLogic.mostrarMano(manoJugador, conexion);
                     break;
             }
         });
@@ -112,6 +123,10 @@ public class ClientApp extends GameApplication {
             conexion.send(bundle);
         });
 
+        onBtnDown(MouseButton.MIDDLE, () -> {
+            UnoLogic.enviarMensaje("Flip", conexion);
+        });
+
         //onEvent(clientInput.mockButtonPress(MouseButton.PRIMARY));
     }
 
@@ -124,13 +139,4 @@ public class ClientApp extends GameApplication {
             });
         }
     }
-
-    
-    
-   
-
-    
-
-
-
 }

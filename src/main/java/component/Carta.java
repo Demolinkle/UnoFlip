@@ -6,6 +6,10 @@ public class Carta implements Serializable {
     private String color;
     private int id;
     private String tipo;
+    //oscuridad
+    private String backupColor;
+    private String backupTipo;
+    private int backupId;
 
     // Constructor
     public Carta(String color, int id, String tipo) {
@@ -38,4 +42,29 @@ public class Carta implements Serializable {
         this.tipo = tipo;
     }
 
+    public void flip() {
+        String tempColor = this.color;
+        String tempTipo = this.tipo;
+        int tempId = this.id;
+
+        this.color = this.backupColor;
+        this.tipo = this.backupTipo;
+        this.id = this.backupId;
+
+        this.backupColor = tempColor;
+        this.backupTipo = tempTipo;
+        this.backupId = tempId;
+    }
+
+    public void setBackupColor(String color) {
+        this.backupColor = color;
+    }
+
+    public void setBackupTipo(String tipo) {
+        this.backupTipo = tipo;
+    }
+
+    public void setBackupId(int id) {
+        this.backupId = id;
+    }
 }

@@ -29,6 +29,21 @@ public class UnoLogic extends Component implements Serializable {
             Collections.shuffle(cartas);
         } while (cartas.get(0).getId() > 9);
 
+         // oscuridad
+        List<Carta> oscuridad = new ArrayList<>();
+        for (int i = 1; i < 15; i++) {
+            oscuridad.add(new Carta("naranja", i, "data"));
+            oscuridad.add(new Carta("purpura", i, "data"));
+            oscuridad.add(new Carta("rosa", i, "data"));
+            oscuridad.add(new Carta("turquesa", i, "data"));
+        }
+        Collections.shuffle(oscuridad);
+        for (int i = 0; i < cartas.size(); i++) {
+            cartas.get(i).setBackupColor(oscuridad.get(i).getColor());
+            cartas.get(i).setBackupId(oscuridad.get(i).getId());
+            cartas.get(i).setBackupTipo(oscuridad.get(i).getTipo());
+        }
+
         return cartas;
     }
 
@@ -65,19 +80,39 @@ public class UnoLogic extends Component implements Serializable {
         bundle.put("carta", (Serializable) mensaje); //aqui
         conexion.send(bundle);
     }
-  
+
+    public static String cartaTipo(String color) {
+        switch (color) {
+            case "amarillo":
+            case "azul":
+            case "rojo":
+            case "verde":
+                return "luz";
+            case "naranja":
+            case "purpura":
+            case "rosa":
+            case "turquesa":
+                return "oscuridad";
+            default:
+                return "luz";
+        }
+    }
+
     public static void mostrarMano(List<Carta> cartas, Connection<Bundle> conexion) {
         getGameWorld().getEntitiesByType(GameFactory.EntityType.MANO).forEach(Entity::removeFromWorld);
         double startX = 50;
         double startY = 300;
         int i = 0;
         for (Carta carta : cartas) {
+            String carpeta = cartaTipo(carta.getColor());
             Entity aux = entityBuilder() // luz/verde/5.png
                     .type(GameFactory.EntityType.MANO)
-                    .viewWithBBox(texture(String.format("luz/%s/%s.png", carta.getColor(), carta.getId()), 60, 100))
+                    .viewWithBBox(texture(String.format("%s/%s/%s.png", carpeta, carta.getColor(), carta.getId()), 60, 100))
                     .onClick(e -> {
                         if (carta.getId() == 14) { // un cambia color
-                            carta.setColor(mostrarBotonesColor());
+                            carta.setColor(mostrarBotonesColor(carpeta));
+                        } else if (carta.getId() == 15){
+                            carta.setColor(mostrarBotonesColor(carpeta));
                         }
                         enviarMensaje("Carta a jugar", carta, conexion);
                     })
@@ -94,9 +129,10 @@ public class UnoLogic extends Component implements Serializable {
         double startY = 300;
         int i = 0;
         for (Carta carta : mazo) {
+            String carpeta = cartaTipo(carta.getColor());
             Entity aux = entityBuilder()
                     .type(GameFactory.EntityType.CARTA_MAZO)// luz/verde/5.png
-                    .viewWithBBox(texture(String.format("luz/%s/%s.png", carta.getColor(), carta.getId()), 60, 100))
+                    .viewWithBBox(texture(String.format("%s/%s/%s.png", carpeta, carta.getColor(), carta.getId()), 60, 100))
                     .build();
             // Coloca la carta en la nueva posición
             aux.setPosition(startX + (i % MAX_CARTAS_POR_FILA) * ESPACIADO_HORIZONTAL, startY + (i / MAX_CARTAS_POR_FILA) * ESPACIADO_VERTICAL);
@@ -109,9 +145,10 @@ public class UnoLogic extends Component implements Serializable {
         if (carta.getId() == 14) { // para cuando se cambie el color se notifique cual es
             showMessage("El nuevo color es: " + carta.getColor()); // el metodo es llamado 2 veces por algun motivo
         }
+        String carpeta = cartaTipo(carta.getColor());
         Entity aux = entityBuilder()
                 .type(GameFactory.EntityType.CARTA)
-                .viewWithBBox(texture(String.format("luz/%s/%s.png", carta.getColor(), carta.getId()), 60, 100))
+                .viewWithBBox(texture(String.format("%s/%s/%s.png", carpeta, carta.getColor(), carta.getId()), 60, 100))
                 .at(700, 300)
                 .build();
         getGameWorld().addEntity(aux);
@@ -119,9 +156,10 @@ public class UnoLogic extends Component implements Serializable {
 
     public static void mostrar_Carta_del_servidor(Carta carta, Connection<Bundle> conexion) {
         getGameWorld().getEntitiesByType(GameFactory.EntityType.CARTA_INICIAL).forEach(Entity::removeFromWorld);
+        String carpeta = cartaTipo(carta.getColor());
         Entity cartaServidor = entityBuilder()
             .type(GameFactory.EntityType.CARTA_INICIAL)// luz/verde/5.png
-            .view(texture(String.format("luz/%s/%s.png", carta.getColor(), carta.getId()), 60, 100))
+            .view(texture(String.format("%s/%s/%s.png", carpeta, carta.getColor(), carta.getId()), 60, 100))
             .at(700,300)
             .build();
         getGameWorld().addEntity(cartaServidor);
@@ -141,25 +179,40 @@ public class UnoLogic extends Component implements Serializable {
         return false;
     }
 
-    private static String mostrarBotonesColor() {
-       List<String> colores = Arrays.asList("amarillo", "azul", "rojo", "verde");
-        //usa un dialogo de seleccion de javafx
-        ChoiceDialog<String> dialog = new ChoiceDialog<>("amarillo", colores);
-        dialog.setTitle("Seleccionar Color");
-        dialog.setHeaderText("Selecciona un color");
-        dialog.setContentText("Color:");
+    private static String mostrarBotonesColor(String tipo) {
+        if (tipo == "luz") {
+            List<String> colores = Arrays.asList("amarillo", "azul", "rojo", "verde");
+            //usa un dialogo de seleccion de javafx
+            ChoiceDialog<String> dialog = new ChoiceDialog<>("amarillo", colores);
+            dialog.setTitle("Seleccionar Color");
+            dialog.setHeaderText("Selecciona un color");
+            dialog.setContentText("Color:");
 
-        Optional<String> result = dialog.showAndWait();
-        return result.orElse("amarillo"); // Valor por defecto si no se selecciona nada
+            Optional<String> result = dialog.showAndWait();
+            return result.orElse("amarillo"); // Valor por defecto si no se selecciona nada
+        } else if(tipo == "oscuridad"){
+            List<String> colores = Arrays.asList("naranja", "purpura", "rosa", "turquesa");
+            //usa un dialogo de seleccion de javafx
+            ChoiceDialog<String> dialog = new ChoiceDialog<>("naranja", colores);
+            dialog.setTitle("Seleccionar Color");
+            dialog.setHeaderText("Selecciona un color");
+            dialog.setContentText("Color:");
+
+            Optional<String> result = dialog.showAndWait();
+            return result.orElse("naranja"); // Valor por defecto si no se selecciona nada
+        }
+        return "";
+       
     }
     // se ejecuta del lado del servidor
     public static Carta jugarCarta(Carta carta_del_servidor, Carta carta_del_jugador, Connection<Bundle> conexion) {
         getGameWorld().getEntitiesByType(GameFactory.EntityType.CARTA_INICIAL).forEach(Entity::removeFromWorld);
         carta_del_servidor = carta_del_jugador;
+        String carpeta = cartaTipo(carta_del_servidor.getColor());
         Entity carta_nueva = entityBuilder()
                 .type(GameFactory.EntityType.CARTA_INICIAL)
                 .with(new NetworkComponent())
-                .view(texture(String.format("luz/%s/%s.png", carta_del_servidor.getColor(), carta_del_servidor.getId()), 60, 100))
+                .view(texture(String.format("%s/%s/%s.png", carpeta, carta_del_servidor.getColor(), carta_del_servidor.getId()), 60, 100))
                 .at(700, 300)
                 .build();
         getGameWorld().addEntity(carta_nueva);
@@ -185,5 +238,11 @@ public class UnoLogic extends Component implements Serializable {
             return mazo2.remove(0);
         }
         return null;
+    }
+//flip
+    public static void voltearCartas(List<Carta> manoJugador) {
+        for (Carta carta : manoJugador) {
+            carta.flip();
+        }
     }
 }

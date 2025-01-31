@@ -11,9 +11,7 @@ import com.almasb.fxgl.entity.Entity;
 import java.util.Collections;
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.Scanner;
 import java.util.List;
-
 
 import component.GameFactory;
 import component.UnoLogic;
@@ -55,7 +53,6 @@ public class ServerGameApp extends GameApplication implements Serializable{
         server.startAsync();
     }
    
-    
     @SuppressWarnings({ "rawtypes", "unchecked" })
     public void onServer() {
         UnoLogic.mostrar_Carta_del_servidor(carta_del_servidor, conexion);
@@ -87,7 +84,25 @@ public class ServerGameApp extends GameApplication implements Serializable{
                             UnoLogic.mostrar_Carta_del_servidor(carta_del_servidor, connection);
                             //put
                             //Logica para la carta +1
-                            if (carta_del_jugador.getId() == 11) {
+                            if (carta_del_jugador.getId() == 10 && UnoLogic.cartaTipo(carta_del_jugador.getColor()) == "luz") {
+                                UnoLogic.enviarMensaje("Activa", connection);
+                                for (Connection conn : conexiones) {
+                                    
+                                    carta_del_servidor = new Carta("naranja", 1, "data"); 
+                                    UnoLogic.enviarMensaje("Nueva carta del servidor", carta_del_servidor, conn);
+                                    UnoLogic.mostrar_Carta_del_servidor(carta_del_servidor, connection);
+                                }
+                            } 
+                            else if (carta_del_jugador.getId() == 10 && UnoLogic.cartaTipo(carta_del_jugador.getColor()) == "oscuridad") {
+                                UnoLogic.enviarMensaje("Activa", connection);
+                                for (Connection conn : conexiones) {
+                                    carta_del_servidor = new Carta("azul", 1, "data"); 
+                                    UnoLogic.enviarMensaje("Nueva carta del servidor", carta_del_servidor, conn);
+                                    UnoLogic.mostrar_Carta_del_servidor(carta_del_servidor, connection);
+                                }
+                            }
+                            else if (carta_del_jugador.getId() == 11 && UnoLogic.cartaTipo(carta_del_jugador.getColor()) == "luz") {
+                                enviarCarta();
                                 // Obligar al siguiente jugador a robar una carta
                                 int siguienteTurno = (turnoActual + 1) % conexiones.size();
                                 Connection siguienteConexion = conexiones.get(siguienteTurno);
@@ -95,17 +110,34 @@ public class ServerGameApp extends GameApplication implements Serializable{
                                 UnoLogic.enviarMensaje("Carta robada", cartaRobada, siguienteConexion);
                                 turnoActual = (siguienteTurno + 1) % conexiones.size();
                                 System.out.println("Carta +1");
+                            } 
+                            else if (carta_del_jugador.getId() == 11 && UnoLogic.cartaTipo(carta_del_jugador.getColor()) == "oscuridad") {
+                                enviarCarta();
+                                int siguienteTurno = (turnoActual + 1) % conexiones.size();
+                                Connection siguienteConexion = conexiones.get(siguienteTurno);
+                                for(int i = 0; i<5; i++){
+                                    Carta cartaRobada = UnoLogic.robarCarta(mazo);
+                                    UnoLogic.enviarMensaje("Carta robada", cartaRobada, siguienteConexion);
+                                }
+                                turnoActual = (siguienteTurno + 1) % conexiones.size();
+                                System.out.println("Carta +1");
                             }
                             //Logica para la carta skip
-                            else if (carta_del_jugador.getId() == 12) {
+                            else if (carta_del_jugador.getId() == 12 && UnoLogic.cartaTipo(carta_del_jugador.getColor()) == "luz") {
+                                enviarCarta();
                                 turnoActual = (turnoActual + 2) % conexiones.size();
                                 System.out.println("Skipear turno");
-                                for (Connection conn : conexiones) {
-                                    UnoLogic.enviarMensaje("Nueva carta del servidor", carta_del_servidor, conn);
-                                }
+                                
+                            } 
+                            else if(carta_del_jugador.getId() == 12 && UnoLogic.cartaTipo(carta_del_jugador.getColor()) == "oscuridad"){
+                                enviarCarta();
+                                turnoActual = (turnoActual + conexiones.size()) % conexiones.size();
+                                System.out.println("Skipear turno");
+                                
                             }
                             //Logica para la carta swap
                             else if (carta_del_jugador.getId() == 13) {
+                                enviarCarta();
                                 Collections.reverse(conexiones);
                                 System.out.println("Invertir dirección de turnos");
                                 if (conexiones.size() == 2) {
@@ -113,9 +145,18 @@ public class ServerGameApp extends GameApplication implements Serializable{
                                 } else {
                                     turnoActual = (turnoActual + conexiones.size() - 1) % conexiones.size();
                                 }
-                                for (Connection conn : conexiones) {
-                                    UnoLogic.enviarMensaje("Nueva carta del servidor", carta_del_servidor, conn);
+                                
+                            }
+                            else if (carta_del_jugador.getId() == 15) {
+                                enviarCarta();
+                                int siguienteTurno = (turnoActual + 1) % conexiones.size();
+                                Connection siguienteConexion = conexiones.get(siguienteTurno);
+                                for(int i = 0; i<2; i++){
+                                    Carta cartaRobada = UnoLogic.robarCarta(mazo);
+                                    UnoLogic.enviarMensaje("Carta robada", cartaRobada, siguienteConexion);
                                 }
+                                turnoActual = (siguienteTurno + 1) % conexiones.size();
+                                System.out.println("Carta +2");
                             }
                             else {
                                 for (Connection conn : conexiones) {
@@ -143,16 +184,28 @@ public class ServerGameApp extends GameApplication implements Serializable{
                     String color = bundle.get("carta");
                     for (Connection<Bundle> conn : conexiones) {
                         if (conn != connection) {
-                            
-
                             UnoLogic.enviarMensaje("Color nuevo", color, connection);
                         }
                     }
                     break;
-                
+
+                case "Flip":
+                    UnoLogic.voltearCartas(mazo);
+                    UnoLogic.mostrarMazo(mazo);
+                    for (Connection conn : conexiones) {
+                        UnoLogic.enviarMensaje("Voltear cartas", conn);
+                    }
+                    break;
             }
         });
         conexiones.add(conexion);
+    }
+
+    @SuppressWarnings({ "rawtypes", "unchecked" })
+    public void enviarCarta(){
+        for (Connection conn : conexiones) {
+            UnoLogic.enviarMensaje("Nueva carta del servidor", carta_del_servidor, conn);
+        }
     }
     
 }
