@@ -154,22 +154,17 @@ public class UnoLogic extends Component implements Serializable {
     }
     // se ejecuta del lado del servidor
     public static Carta jugarCarta(Carta carta_del_servidor, Carta carta_del_jugador, Connection<Bundle> conexion) {
-        if (esValido(carta_del_servidor, carta_del_jugador)) {
-            getGameWorld().getEntitiesByType(GameFactory.EntityType.CARTA_INICIAL).forEach(Entity::removeFromWorld);
-            carta_del_servidor = carta_del_jugador;
-            Entity carta_nueva = entityBuilder()
+        getGameWorld().getEntitiesByType(GameFactory.EntityType.CARTA_INICIAL).forEach(Entity::removeFromWorld);
+        carta_del_servidor = carta_del_jugador;
+        Entity carta_nueva = entityBuilder()
                 .type(GameFactory.EntityType.CARTA_INICIAL)
                 .with(new NetworkComponent())
                 .view(texture(String.format("luz/%s/%s.png", carta_del_servidor.getColor(), carta_del_servidor.getId()), 60, 100))
                 .at(700, 300)
                 .build();
-            getGameWorld().addEntity(carta_nueva);
-            enviarMensaje("Nueva carta", carta_del_servidor, conexion);
-            enviarMensaje("Eliminar carta", carta_del_jugador, conexion);
-
-        }  else {
-            enviarMensaje("No puedes jugar esa carta", conexion);
-        }
+        getGameWorld().addEntity(carta_nueva);
+        enviarMensaje("Nueva carta", carta_del_servidor, conexion);
+        enviarMensaje("Eliminar carta", carta_del_jugador, conexion);
         return carta_del_servidor;
     }
 
