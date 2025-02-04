@@ -6,13 +6,13 @@ import com.almasb.fxgl.app.GameApplication;
 import static com.almasb.fxgl.dsl.FXGL.*;
 import com.almasb.fxgl.app.GameSettings;
 import com.almasb.fxgl.net.Connection;
-//import com.almasb.fxgl.input.Input;
 
+import javafx.scene.control.Alert;
+import javafx.scene.control.Alert.AlertType;
+import javafx.scene.control.ButtonType;
 import javafx.scene.input.MouseButton;
-//import javafx.scene.input.KeyCode;
 import java.util.ArrayList;
 import java.util.List;
-
 import component.GameFactory;
 import component.UnoLogic;
 import component.Carta;
@@ -21,11 +21,8 @@ public class ClientApp extends GameApplication {
 
     private final int anchoPantalla = 1400;
     private final int altoPantalla = 700;
-    //multiplayer
-    //private Input clientInput;
     private Connection<Bundle> conexion;
     private List<Carta> manoJugador = new ArrayList<>();
-    //private List<Carta> manoJugador = new List<>();
 
     @Override
     protected void initSettings(GameSettings gameSettings) {
@@ -40,7 +37,6 @@ public class ClientApp extends GameApplication {
         var client = getNetService().newTCPClient("localhost", 55555);
         client.setOnConnected(conn -> {
             conexion = conn;
-            
             getGameWorld().addEntityFactory(new GameFactory(conexion));
             getExecutor().startAsyncFX(() -> onClient());
             System.out.println("Cliente conectado");
@@ -51,6 +47,7 @@ public class ClientApp extends GameApplication {
     private void onClient() {
         getGameWorld().spawn("fondo");
         getGameWorld().spawn("mazo_recarga");
+        getGameWorld().spawn("boton_ayuda");
         conexion.addMessageHandlerFX((conexion, bundle) -> {
             switch (bundle.getName()) {
                 case "Mano inicial":
@@ -87,22 +84,19 @@ public class ClientApp extends GameApplication {
                     break;
 
                 case "Derrota":
-                    getDialogService().showMessageBox("¡Has perdido!", () -> {
-                        //getGameController().exit();
-                    });
+                    getDialogService().showMessageBox("¡Has perdido!", () -> {});
                     break;
 
                 case "Color nuevo":
-                    // Mostrar los botones para elegir color
                     String colorNuevo = bundle.get("carta");
-                    getDialogService().showMessageBox("Color nuevo: " + colorNuevo, () -> {
-                        //getGameController().exit();
-                    });
-                   
+                    getDialogService().showMessageBox("Color nuevo: " + colorNuevo, () -> {});
                     break;
 
-                case "No puedes jugar esa carta":
-                    getDialogService().showMessageBox("No puedes jugar esa carta", () -> {});
+                case "No es tu turno":
+                    Alert alert = new Alert(AlertType.INFORMATION, "No es tu turno", ButtonType.CLOSE);
+                    alert.setTitle("Mensaje de Ayuda");
+                    alert.setHeaderText("Advertencia");
+                    alert.showAndWait();
                     break;
 
                 case "Voltear cartas":
@@ -115,28 +109,18 @@ public class ClientApp extends GameApplication {
     
     @Override
     protected void initInput() {
-        //clientInput = new Input();
-
         onBtnDown(MouseButton.SECONDARY, () -> {
             System.out.println("Click derecho");
             Bundle bundle = new Bundle("Repartir");
             conexion.send(bundle);
         });
-
-        onBtnDown(MouseButton.MIDDLE, () -> {
-            UnoLogic.enviarMensaje("Flip", conexion);
-        });
-
-        //onEvent(clientInput.mockButtonPress(MouseButton.PRIMARY));
     }
 
     public void victoria(List<Carta> manoJugador) {
         if (manoJugador.isEmpty()) {
             Bundle bundle = new Bundle("Victoria");
             conexion.send(bundle);
-            getDialogService().showMessageBox("¡Has ganado!", () -> {
-                //getGameController().exit();
-            });
+            getDialogService().showMessageBox("¡Has ganado!", () -> {});
         }
     }
 }

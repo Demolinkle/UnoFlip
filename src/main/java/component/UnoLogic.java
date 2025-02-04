@@ -12,9 +12,9 @@ import java.io.Serializable;
 
 public class UnoLogic extends Component implements Serializable {
 
-    private static final double ESPACIADO_HORIZONTAL = 55;
-    private static final double ESPACIADO_VERTICAL = 30;
-    private static final int MAX_CARTAS_POR_FILA = 10;
+    private static final double HORIZONTAL = 55;
+    private static final double VERTICAL = 30;
+    private static final int FILA_CARTAS = 10;
 
     public static List<Carta> generarMazo() {
         List<Carta> cartas = new ArrayList<>();
@@ -118,7 +118,7 @@ public class UnoLogic extends Component implements Serializable {
                     })
                     .build();
             // Coloca la carta en la nueva posición
-            aux.setPosition(startX + (i % MAX_CARTAS_POR_FILA) * ESPACIADO_HORIZONTAL, startY + (i / MAX_CARTAS_POR_FILA) * ESPACIADO_VERTICAL);
+            aux.setPosition(startX + (i % FILA_CARTAS) * HORIZONTAL, startY + (i / FILA_CARTAS) * VERTICAL);
             i++;
             getGameWorld().addEntity(aux);
         }
@@ -135,7 +135,7 @@ public class UnoLogic extends Component implements Serializable {
                     .viewWithBBox(texture(String.format("%s/%s/%s.png", carpeta, carta.getColor(), carta.getId()), 60, 100))
                     .build();
             // Coloca la carta en la nueva posición
-            aux.setPosition(startX + (i % MAX_CARTAS_POR_FILA) * ESPACIADO_HORIZONTAL, startY + (i / MAX_CARTAS_POR_FILA) * ESPACIADO_VERTICAL);
+            aux.setPosition(startX + (i % FILA_CARTAS) * HORIZONTAL, startY + (i / FILA_CARTAS) * VERTICAL);
             i++;
             getGameWorld().addEntity(aux);
         }
@@ -154,7 +154,7 @@ public class UnoLogic extends Component implements Serializable {
         getGameWorld().addEntity(aux);
     }
 
-    public static void mostrar_Carta_del_servidor(Carta carta, Connection<Bundle> conexion) {
+    public static void mostrarCartaServidor(Carta carta, Connection<Bundle> conexion) {
         getGameWorld().getEntitiesByType(GameFactory.EntityType.CARTA_INICIAL).forEach(Entity::removeFromWorld);
         String carpeta = cartaTipo(carta.getColor());
         Entity cartaServidor = entityBuilder()
@@ -204,7 +204,7 @@ public class UnoLogic extends Component implements Serializable {
         return "";
        
     }
-    // se ejecuta del lado del servidor
+    
     public static Carta jugarCarta(Carta carta_del_servidor, Carta carta_del_jugador, Connection<Bundle> conexion) {
         getGameWorld().getEntitiesByType(GameFactory.EntityType.CARTA_INICIAL).forEach(Entity::removeFromWorld);
         carta_del_servidor = carta_del_jugador;
